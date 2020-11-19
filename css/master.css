@@ -1,0 +1,437 @@
+*,
+*:before,
+*:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #ffffff;
+  font-family: "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴシック",
+    "ヒラギノ丸ゴ ProN", "serif", "YuGothic", "Yu Gothic";
+  /*min-height: 100vh;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-image: url(../src/img/test.png);*/
+}
+
+#main {
+  display: flex;
+  flex-direction: row;
+}
+
+.container {
+  color: #2b2b2b;
+  padding: 20px;
+  font-size: 0; /*要素同士をぴったりくっつけるための処理、不要な改行を消す*/
+  
+  /* border: medium solid #4682b4; デバッグ用 */
+}
+
+p {
+  font-size: 12px;
+}
+
+h1 {
+  font-size: 30px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+li {
+  font-size: 10px;
+  list-style: none;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+ul {
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  font-size: 20px;
+  color: white;
+}
+
+
+.leftclum-wrapper,
+.centerclum-wrapper,
+.rightclum-wrapper {
+  position: absolute;
+  height: 100vh;
+  margin: 0;
+}
+
+
+.leftclum-wrapper{
+  left: 0;
+  width: 60%;
+  min-height: 100%;
+  background: #f8dee2;
+}
+
+/* .leftclum-wrapper::before {
+  content: "";
+  display: inline-block;
+  width: 17.5vw;
+  height: 100%;
+  background: #dc143c;
+}
+
+.now-active-clum.leftclum-wrapper::before {
+  display: none;
+}  */
+
+.rightclum-wrapper{
+  right: 30px; /*MoveViewPageの分*/
+  width: 60%;
+  min-height: 100%;
+  background: #d3eafa;
+  text-align: right;
+}
+
+.rightclum-wrapper .container{
+  text-align: left;
+}
+
+/* .rightclum-wrapper::before {
+  content: "";
+  display: inline-block;
+  width: calc(17.5vw - 30px);
+  height: 100%;
+  background: #4682b4;
+}
+
+.now-active-clum.rightclum-wrapper::before {
+  display: none;
+} */
+
+.no-active-clum.rightclum-wrapper:hover,
+.no-active-clum.leftclum-wrapper:hover{
+  opacity: 0.5;
+  transition: all 200ms 0s ease;
+}
+.no-active-clum.centerclum-wrapper:hover {
+  background: #e4e4e4;
+  border: 2px solid #2b2b2b;
+  transition: all 200ms 0s ease;
+}
+.no-active-clum.centerclum-wrapper:hover .container {
+  color:#2b2b2b;
+  transition: all 200ms 0s ease;
+}
+
+
+.centerclum-wrapper {
+  left: 50%;
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+  width: 65%;
+  min-height: 100%;
+  background: #f5f5f5;
+}
+
+/* .centerclum-wrapper::before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  background: #cccccc;
+}
+
+.now-active-clum.centerclum-wrapper::before {
+  display: none;
+} */
+
+.MoveViewPage {
+  position: fixed;
+  width: 30px;
+  min-height: 100vh;
+  /* height: 40px; */
+  background-color: #ff6347;
+  right: 0px;
+  bottom: 0px;
+  z-index: 3;
+}
+
+.MoveViewPage:hover {
+  cursor: pointer;
+  background: #ff7f50;
+}
+
+.MoveViewPage .arow_box {
+  width: 40px;
+} 
+
+.MoveViewPage img {
+  width: 30%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  transform: rotate(180deg);
+}
+
+
+.work {
+  width: 100%;
+  height: calc(100% - 6px);
+  margin: 10px 0px;
+  padding: 10px;
+  border: solid 1.5px #5d5d5d;
+  text-align: left;
+
+  transition: all 250ms 0s ease;
+}
+
+.now-active-clum .work:hover {
+  background-color: #e2e2e2;
+  cursor: pointer;
+}
+
+.work-block{
+  position: relative;
+}
+
+.to-move-right-clum-button,
+.to-move-left-clum-button {
+  border-radius: 10px 10px 10px 10px;
+  display: none;
+  width: 48%;
+  height: 90%;
+  z-index: 3;
+  opacity: 0.15;
+  position: absolute;
+  transition: all 200ms 0s ease;
+}
+
+.to-move-right-clum-button h2,
+.to-move-left-clum-button h2 {
+  font-size: 30px;
+  width: 100%;
+  margin: 0;
+  color: #fff;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  -webkit-transform : translateY(-50%);
+  transform : translateY(-50%);
+}
+
+.to-move-right-clum-button:hover,
+.to-move-left-clum-button:hover {
+  opacity: 1;
+}
+
+.selecting .to-move-right-clum-button,
+.selecting .to-move-left-clum-button {
+  display: inline-block;
+}
+
+.to-move-right-clum-button{
+  background: #000080;
+  right: 1%;
+  top: 5%;
+}
+
+.to-move-left-clum-button{
+  background: #dc143c;
+  left: 1%;
+  top: 5%;
+}
+
+
+/*画像と文字を横に並べる*/
+.work-txt {
+  vertical-align: top;
+  display: inline-block;
+  width: 70%;
+}
+
+h3 {
+  display: inline-block;
+}
+
+h4 {
+  color: #4682b4;
+  font-style:italic;
+  font-size: 11px;
+  padding: 2px;
+  margin: 0 0px 0 5px;
+  display: inline-block;
+}
+
+.workImg {
+  display: inline-block;
+  /*overflow: hidden;*/
+  width: 30%;
+  padding: 10px;
+  float: right;
+}
+
+.workImg img {
+  max-width: 100%;
+  max-height: 150px;
+  float: right;
+}
+
+.work:after {
+  content: "";
+  clear: both;
+  display: block;
+}
+
+.works input {
+  display: none;
+}
+
+.works .stu0 {
+  opacity: 1;
+}
+
+.works .stu1 {
+  opacity: 0.2;
+}
+
+.works .stu2 {
+  display: none;
+}
+
+.drop-list{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+
+/*createdclum*/
+.delete_articles,
+.want_read_articles {
+  
+}
+
+.delete_article ,
+.want_read_article  {
+  border: 2px solid #2b2b2b;
+  margin: 10px 0px;
+  padding: 10px;
+
+  transition: all 200ms 0s ease;
+}
+
+.now-active-clum .delete_article:hover{
+  background: #ffcece;
+  cursor: pointer;
+}
+
+.now-active-clum .want_read_article:hover {
+  background: #cdd6ff;
+  cursor: pointer;
+}
+
+.delete_article p,
+.want_read_article p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.work-block:not(.now-sort-selected),
+.want_read_article:not(.now-sort-selected),
+.delete_article:not(.now-sort-selected){
+  display: none;
+}
+
+
+/*leftclum*/
+.leftclum-wrapper h1 {
+  color: #203744;
+}
+
+/*読了ボタン*/
+.read_finish_button {
+  z-index: 3;
+  position: fixed;
+  bottom: 20px;
+  right: 50px;
+  border: 0px;
+  background: #203744;
+  color: #fff;
+  width: 50px;
+  height: 50px;
+  border-radius: 5%;
+  text-align: center;
+  font-weight: solid;
+}
+
+.read_finish_button:hover {
+  background: #4682b4;
+}
+
+
+/*now-activeなコラムスタイル*/
+.now-active-clum {
+  z-index: 3;
+  /* background: #f5f5f5; */
+  border: 4px solid #2b2b2b;
+  box-shadow:0px 0px 25px;
+  overflow-y: scroll;
+  -ms-overflow-style: none;    /* IE, Edge 対応 */
+        scrollbar-width: none;       /* Firefox 対応 */
+  
+  transition: all 100ms 0s ease;
+}
+.now-active-clum::-webkit-scrollbar {  /* Chrome, Safari 対応 */
+  display:none;
+}
+
+.no-active-clum {
+  opacity: 0.2;
+  overflow-y: hidden;
+  border: 2px solid #2b2b2b;
+}
+
+/* 
+.no-active-clum.rightclum-wrapper:hover{
+  background-color: #4682b4;
+  transition: all 300ms 0s ease;
+}
+
+.no-active-clum.leftclum-wrapper:hover{
+  background-color: #dc143c;
+  transition: all 300ms 0s ease;
+} */
+
+.layer1 {
+  z-index: 1;
+}
+
+.layer2 {
+  z-index: 2;
+  opacity: 1;
+  background: #ffffff;
+  border: 2px solid rgba(0,0,0,0.3);
+  /* background: #ececec; */
+  box-shadow:0px 0px 25px;
+}
+
+.layer2 .container {
+  color:rgba(0,0,0,0.3);
+}
+

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+
+<head>
+  <meta charset="utf-8" />
+  <title>sorting news</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/master.css" />
+  <!--<link rel="stylesheet" href="css/responsive.css">-->
+  <script type="text/javascript" src="js/SelectNews.js"></script>
+</head>
+
+<body>
+  <header></header>
+  <div id="main">
+    <div class="leftclum-wrapper no-active-clum">
+      <div class="container">
+        <h1>読まないリスト</h1>
+        <div class="delete_articles"></div>
+      </div>
+    </div>
+    <!--End : top-wrapper-->
+    <div class="centerclum-wrapper now-active-clum">
+      <div class="container">
+        <h1>SORTING NEWS</h1>
+        <div class="works"></div>
+        <!--End : works-->
+      </div>
+      <!--End : container-->
+    </div>
+    <!--End : works-wrapper-->
+    <div class="rightclum-wrapper no-active-clum">
+      <div class="container">
+        <h1>読むリスト</h1>
+        <div class="want_read_articles"></div>
+        <!-- <input type="button" name="delete_article" value="読了" onClick="WriteAllToNoReadFile()" onfocus="this.blur();" /> -->
+      </div>
+    </div>
+    <input class="read_finish_button" type="button" name="delete_article" value="読了" onClick="WriteAllToNoReadFile()"
+      onfocus="this.blur();" />
+    <div class="MoveViewPage">
+      <div class="arow_box">
+        <img src="src/img/arow.png" />
+      </div>
+    </div>
+  </div>
+  <!--End : main-->
+  <footer></footer>
+</body>
+
+</html>
