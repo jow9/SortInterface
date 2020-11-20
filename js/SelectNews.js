@@ -4,18 +4,6 @@ var rightClumWrapperElement = document.getElementsByClassName("rightclum-wrapper
 var centerClumWrapperElement = document.getElementsByClassName("centerclum-wrapper");
 var nowActiveClum = "centerclum";
 
-var GerneList = ["すべて"]; //ジャンルリスト
-var mainGerneCounter = [];
-var readGerneCounter = [];
-var noreadGerneCounter = [];
-
-var data_max_num = 40; //データの上限を決める：ココのコード本当にひどい…
-
-//ページ内で右クリックした際にメニュー表示するデフォルト機能を停止にする（後にこの機能は削除する）
-// document.oncontextmenu = function () {
-//   return false;
-// };
-
 window.onload = function () {
   console.log("Onload SelectNews.js file");
 
@@ -54,8 +42,8 @@ window.onload = function () {
   );
 
   LogWriteFile("画面のリロード");
-  CreateMainClum();
-  MainClumIntotxt();
+  //CreateMainClum();
+  ReadArticle();
 };
 
 //window内でクリックされたら
@@ -111,10 +99,36 @@ function SetNowControlClum(clickClum) {
 
 
 /*
-//mainClumを生成する
+// 記事を読み込む
 */
-function CreateMainClum() {
-  for (let i = 0; i < data_max_num; i++) {
+function ReadArticle() {
+  let xmlHttpReq = new XMLHttpRequest();
+  let cmd = "./rb/index.rb?cmd=readArray";
+
+  xmlHttpReq.open("GET", cmd, true); //ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス
+  xmlHttpReq.responseType = "json";
+  xmlHttpReq.send(null); //サーバーへのリクエストを送信する、引数はPOSTのときのみ利用
+
+  xmlHttpReq.onreadystatechange = function () {
+    if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
+      //テキストの編集
+      let article_json = xmlHttpReq.response;
+      //MainClumIntotxt(article_json);
+      //CreateMainClum(article_json);
+      CreateArticleList(article_json);
+    }
+  }
+}
+
+
+/*
+//メインカラムに記事のリストを作成する
+*/
+function CreateArticleList(article_json) {
+  console.log(Object.keys(article_json).length);
+  console.log(article_json);
+
+  for (let i = 0; i < Object.keys(article_json).length; i++) {
     let articleID = ('000' + i).slice(-3);
 
     //work-block要素の作成
@@ -136,26 +150,6 @@ function CreateMainClum() {
       },
       false
     );
-
-    //左クリック時選択記事を「読みたい記事」として登録する
-    // workBlockElement.addEventListener(
-    //   "click",
-    //   function () {
-    //     if (nowActiveClum == "centerclum") {
-    //       ClickMainClum({ id: selectNewsArray[i] });
-    //     }
-    //   },
-    //   false
-    // );
-
-    //右クリック時選択記事を「読みたくない記事」として登録する
-    // workBlockElement.addEventListener(
-    //   "contextmenu",
-    //   function () {
-    //     DeleteArticle({ id: selectNewsArray[i] });
-    //   },
-    //   false
-    // );
 
     let toMoveRightClumElement = document.createElement("div");
     toMoveRightClumElement.className = "to-move-right-clum-button";
@@ -191,286 +185,55 @@ function CreateMainClum() {
       false
     );
 
-
-
     //work要素の作成
     let workElement = document.createElement("div");
     workElement.className = "work";
 
-    //workImg要素の作成
-    // let workImgElement = document.createElement("div");
-    // workImgElement.className = "workImg";
-    // let imgElement = document.createElement("img");
-    // imgElement.src = "src/img/" + articleID + ".png";
-    // imgElement.onerror = function () {
-    //   this.style.display = "none";
-    // };
+    //1行目をジャンル、2行目を見出し、3行目以降を本文として扱う
+    //行単位に文章を分割する
+    let txt_array = article_json[('000' + i).slice(-3)].split(/\r?\n/);
+
+    //work-txt要素の作成
+    let work_txtElement = document.createElement("div");
+    work_txtElement.className = "work-txt";//クラス名にジャンルを追加する
+    let h4Element = document.createElement("h4");
+    let h3Element = document.createElement("h3");
+    let pElement = document.createElement("p");
+
+    h4Element.innerHTML = "#" + txt_array[0];
+    h3Element.innerHTML = txt_array[1];
+    let index = txt_array[3].indexOf("。"); //句点で本文を区切り最初の一文をアブストとして扱う
+    pElement.innerHTML = txt_array[3].substring(0, index) + "。";
+
+    //img-block要素の作成
+    let workImgElement = document.createElement("div");
+    workImgElement.className = "workImg";
+    let imgElement = document.createElement("img");
+    imgElement.src = txt_array[2];
+    imgElement.onerror = function () {
+      this.style.display = "none";
+    };
+
+    work_txtElement.appendChild(h3Element);
+    work_txtElement.appendChild(h4Element);
+    work_txtElement.appendChild(pElement);
+    workElement.insertBefore(
+      work_txtElement,
+      workElement.firstChild
+    );
+
+    workImgElement.appendChild(imgElement);
+    workElement.appendChild(workImgElement);
 
     //構造体の制作
-    //workImgElement.appendChild(imgElement);
-    //workElement.appendChild(workImgElement);
     workBlockElement.appendChild(workElement);
     workBlockElement.appendChild(toMoveRightClumElement);
     workBlockElement.appendChild(toMoveLeftClumElement);
     worksElement[0].appendChild(workBlockElement); //設定されたIDと登録順序が通信速度の差でずれてしまう
   }
-}
 
-/*
-// メインコラムにテキストを挿入する
-*/
-function MainClumIntotxt() {
-  let workElements = document.getElementsByClassName("work");
-  let xmlHttpReq = new XMLHttpRequest();
-  let cmd = "./rb/index.rb?cmd=readArray";
-  // let idArray = selectNewsArray[0];
-  // for (var i = 1; i < selectNewsArray.length; i++) {
-  //   idArray += "," + selectNewsArray[i];
-  // }
-  // let fileName = "&fn=" + idArray;//cmd=readArray&fn=001,002,003
-
-  xmlHttpReq.open("GET", cmd, true); //ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス
-  xmlHttpReq.responseType = "json";
-  xmlHttpReq.send(null); //サーバーへのリクエストを送信する、引数はPOSTのときのみ利用
-
-  xmlHttpReq.onreadystatechange = function () {
-    if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
-      //テキストの編集
-      let article_json = xmlHttpReq.response;
-      console.log(article_json);
-
-      let tempGerneList = ["すべて"];
-      for (let i = 0; i < data_max_num; i++) {
-        //1行目をジャンル、2行目を見出し、3行目以降を本文として扱う
-        //行単位に文章を分割する
-        let txt_array = article_json[('000' + i).slice(-3)].split(/\r?\n/);
-        document.getElementsByClassName("work-block")[i].classList.add(txt_array[0]);//ジャンルの登録
-        tempGerneList.push(txt_array[0]);
-
-        //work-txt要素の作成
-        let work_txtElement = document.createElement("div");
-        work_txtElement.className = "work-txt";//クラス名にジャンルを追加する
-        let h4Element = document.createElement("h4");
-        let h3Element = document.createElement("h3");
-        let pElement = document.createElement("p");
-
-        h4Element.innerHTML = "#" + txt_array[0];
-        h3Element.innerHTML = txt_array[1];
-        let index = txt_array[3].indexOf("。"); //句点で本文を区切り最初の一文をアブストとして扱う
-        pElement.innerHTML = txt_array[3].substring(0, index) + "。";
-
-
-        //img-block要素の作成
-        let workImgElement = document.createElement("div");
-        workImgElement.className = "workImg";
-        let imgElement = document.createElement("img");
-        imgElement.src = txt_array[2];
-        imgElement.onerror = function () {
-          this.style.display = "none";
-        };
-
-
-        work_txtElement.appendChild(h3Element);
-        work_txtElement.appendChild(h4Element);
-        work_txtElement.appendChild(pElement);
-        workElements[i].insertBefore(
-          work_txtElement,
-          workElements[i].firstChild
-        );
-
-        workImgElement.appendChild(imgElement);
-        workElements[i].appendChild(workImgElement);
-
-        //画面要素の状態の編集
-        if (i == workElements.length - 1) {
-          ReadListFile("read");
-          ReadListFile("noread");
-        }
-      }
-
-      // ジャンルリストに重複が生まれないように余分な要素を削除
-      GerneList = tempGerneList.filter(function (x, i, self) {
-        return self.indexOf(x) === i;
-      });
-      CreatDropDownMenu(GerneList);
-      console.log(GerneList);
-
-      for (let i = 1; i < GerneList.length; i++) {
-        mainGerneCounter[GerneList[i]] = 0;
-        readGerneCounter[GerneList[i]] = 0;
-        noreadGerneCounter[GerneList[i]] = 0;
-      }
-
-      for (let i = 1; i < tempGerneList.length; i++) {
-        mainGerneCounter[tempGerneList[i]] += 1;
-      }
-
-      //各ジャンル数をカウントし、要素を追加
-      CreatGerneCounter("centerclum-wrapper", mainGerneCounter);
-      CreatGerneCounter("rightclum-wrapper", readGerneCounter);
-      CreatGerneCounter("leftclum-wrapper", noreadGerneCounter);
-    }
-  };
-}
-
-
-/*
-//ジャンルリストをもとにドロップダウンメニューを作成
-//list:配列を受け取りその要素をもとにドロップダウンメニューを作成
-*/
-function CreatDropDownMenu(list) {
-  let selectElement = document.createElement("select");
-  selectElement.name = "gerne";
-  selectElement.className = "drop-list";
-
-  let optionAllElement = document.createElement("option");
-  optionAllElement.value = "すべて";
-  optionAllElement.innerHTML = "すべて";
-  selectElement.appendChild(optionAllElement);
-
-  for (let i = 1; i < list.length; i++) {
-    let optionElement = document.createElement("option");
-    optionElement.value = list[i];
-    optionElement.innerHTML = list[i];
-
-    selectElement.appendChild(optionElement);
-  }
-
-  //親要素に登録
-  let centerclum = document.getElementsByClassName("centerclum-wrapper")[0].getElementsByClassName("container");
-  let rightclum = document.getElementsByClassName("rightclum-wrapper")[0].getElementsByClassName("container");
-  let leftclum = document.getElementsByClassName("leftclum-wrapper")[0].getElementsByClassName("container");
-  centerclum[0].insertBefore(selectElement.cloneNode(true), centerclum[0].getElementsByTagName("h1")[0]);
-  rightclum[0].insertBefore(selectElement.cloneNode(true), rightclum[0].getElementsByTagName("h1")[0]);
-  leftclum[0].insertBefore(selectElement.cloneNode(true), leftclum[0].getElementsByTagName("h1")[0]);
-
-  //ドロップダウンメニューのイベントを登録
-  centerclum[0].getElementsByClassName("drop-list")[0].addEventListener('change', function () {
-    //選択されたoption番号を取得
-    var index = this.selectedIndex;
-    SortArticle(centerclum[0].getElementsByClassName("works")[0], GerneList[index]);
-  });
-
-  rightclum[0].getElementsByClassName("drop-list")[0].addEventListener('change', function () {
-    //選択されたoption番号を取得
-    var index = this.selectedIndex;
-    SortArticle(rightclum[0].getElementsByClassName("want_read_articles")[0], GerneList[index]);
-  });
-
-  leftclum[0].getElementsByClassName("drop-list")[0].addEventListener('change', function () {
-    //選択されたoption番号を取得
-    var index = this.selectedIndex;
-    SortArticle(leftclum[0].getElementsByClassName("delete_articles")[0], GerneList[index]);
-  });
-}
-
-
-/*
-// ドロップボックスを操作した時のイベント
-// 記事をソートする
-// parentElement:親要素を特定（rightclum or centerclum or leftclumのどれか）
-// selectedOptionName:string型、記事のジャンル名を指定する
-*/
-function SortArticle(parentElement, selectedOptionName) {
-  console.log(selectedOptionName);
-  if (selectedOptionName == "すべて") {
-    let allElement = parentElement.children;
-    for (let i = 0; i < allElement.length; i++) {
-      allElement[i].classList.add("now-sort-selected");
-    }
-  } else {
-    let nowsortselectedElement = parentElement.getElementsByClassName("now-sort-selected");
-    let selectedElement = parentElement.getElementsByClassName(selectedOptionName);
-
-    //クラス名の初期化
-    let nowsortlen = nowsortselectedElement.length;
-    for (let i = 0; i < nowsortlen; i++) {
-      nowsortselectedElement[0].classList.remove('now-sort-selected');
-    }
-
-    //選択したジャンルの要素にクラス名を追加
-    for (let i = 0; i < selectedElement.length; i++) {
-      selectedElement[i].classList.add("now-sort-selected");
-    }
-  }
-}
-
-
-/*
-//指定したコラムに各ジャンルの記事カウンターを作成する
-//clumElementName: カウンターを作成するタブを指定
-//gerneCount: ジャンルの数を管理している配列を渡す
-*/
-function CreatGerneCounter(clumElementName, gerneCount) {
-  let clumElement = document.getElementsByClassName(clumElementName)[0];
-  if (clumElement.getElementsByClassName("gerne-counter").length != 0) {
-    return;
-  }
-
-  let GerneCounterULElement;
-  GerneCounterULElement = document.createElement("ul");
-  GerneCounterULElement.className = "gerne-counter";
-
-  for (let i = 1; i < GerneList.length; i++) {
-    let liElement = document.createElement("li");
-    liElement.className = "list_" + GerneList[i];
-    liElement.innerHTML = GerneList[i] + ":" + gerneCount[GerneList[i]];
-    GerneCounterULElement.appendChild(liElement);
-  }
-
-  clumElement.getElementsByClassName("container")[0].insertBefore(GerneCounterULElement, clumElement.getElementsByClassName("container")[0].firstChild);
-}
-
-
-/*
-//ジャンルの数（変動）を反映させ表示する
-//beforeClum:移動前のコラム（right or center or left）
-//afterClum:移動先のコラム（right or center or left）
-//gerne:移動したコラムのジャンル名
-*/
-function CountGerne(beforeClum, afterClum, gerne) {
-  let beforeliElement = document.getElementsByClassName(beforeClum)[0].getElementsByClassName("list_" + gerne);
-  let afterliElement = document.getElementsByClassName(afterClum)[0].getElementsByClassName("list_" + gerne);
-  console.log(gerne);
-  console.log(mainGerneCounter[gerne]);
-  switch (beforeClum) {
-    case "":
-      mainGerneCounter[gerne] += 1;
-      afterliElement[0].innerHTML = gerne + ":" + mainGerneCounter[gerne];
-      break;
-
-    case "centerclum-wrapper":
-      switch (afterClum) {
-        case "rightclum-wrapper":
-          mainGerneCounter[gerne] -= 1;
-          readGerneCounter[gerne] += 1;
-          beforeliElement[0].innerHTML = gerne + ":" + mainGerneCounter[gerne];
-          afterliElement[0].innerHTML = gerne + ":" + readGerneCounter[gerne];
-          break;
-
-        case "leftclum-wrapper":
-          mainGerneCounter[gerne] -= 1;
-          noreadGerneCounter[gerne] += 1;
-          beforeliElement[0].innerHTML = gerne + ":" + mainGerneCounter[gerne];
-          afterliElement[0].innerHTML = gerne + ":" + noreadGerneCounter[gerne];
-          break;
-      }
-      break;
-
-    case "rightclum-wrapper":
-      readGerneCounter[gerne] -= 1;
-      mainGerneCounter[gerne] += 1;
-      beforeliElement[0].innerHTML = gerne + ":" + readGerneCounter[gerne];
-      afterliElement[0].innerHTML = gerne + ":" + mainGerneCounter[gerne];
-      break;
-
-    case "leftclum-wrapper":
-      noreadGerneCounter[gerne] -= 1;
-      mainGerneCounter[gerne] += 1;
-      beforeliElement[0].innerHTML = gerne + ":" + noreadGerneCounter[gerne];
-      afterliElement[0].innerHTML = gerne + ":" + mainGerneCounter[gerne];
-      break;
-  }
+  ReadListFile("read");
+  ReadListFile("noread");
 }
 
 
@@ -637,7 +400,6 @@ function WriteAllToNoReadFile() {
         CreateClum(workBlockElement, list[i], "delete");
 
         //要素を探索し削除
-        CountGerne("rightclum-wrapper", "leftclum-wrapper", document.getElementById("want_read_article_" + list[i]).getElementsByTagName("h4")[0].innerHTML.replace("#", ""));
         document.getElementById("want_read_article_" + list[i]).remove();
       }
     }
@@ -680,7 +442,6 @@ function CreateClum(workBlockElement, id, select) {
     function () {
       if (nowActiveClum == targetClumName) {
         //Listファイルから指定要素の削除
-        CountGerne(targetClumName + "-wrapper", "centerclum-wrapper", workBlockElement.getElementsByTagName("h4")[0].innerHTML.replace("#", ""));
         ReWriteFile(ElementStatus, id);
         workBlockElement.classList.remove("stu2");
         workBlockElement.classList.add("stu0");
@@ -702,7 +463,6 @@ function CreateClum(workBlockElement, id, select) {
     "h4"
   )[0].innerHTML;
   ArticleElement.classList.add(h4Element.innerHTML.replace("#", ""));
-  CountGerne("centerclum-wrapper", targetClumName + "-wrapper", h4Element.innerHTML.replace("#", ""));
 
   //p要素（スニペッド）の作成
   let pElement = document.createElement("p");
