@@ -4,6 +4,12 @@ var rightClumWrapperElement = document.getElementsByClassName("rightclum-wrapper
 var centerClumWrapperElement = document.getElementsByClassName("centerclum-wrapper");
 var nowActiveClum = "centerclum";
 
+var article_json;//記事のリスト
+var read_article_list = [];
+var no_read_article_list = [];
+
+
+
 window.onload = function () {
   console.log("Onload SelectNews.js file");
 
@@ -112,10 +118,10 @@ function ReadArticle() {
   xmlHttpReq.onreadystatechange = function () {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
       //テキストの編集
-      let article_json = xmlHttpReq.response;
-      //MainClumIntotxt(article_json);
-      //CreateMainClum(article_json);
-      CreateArticleList(article_json);
+      article_json = xmlHttpReq.response;
+      //ReadListFile("read");
+      //ReadListFile("noread");
+      CreateArticleList();
     }
   }
 }
@@ -124,7 +130,7 @@ function ReadArticle() {
 /*
 //メインカラムに記事のリストを作成する
 */
-function CreateArticleList(article_json) {
+function CreateArticleList() {
   console.log(Object.keys(article_json).length);
   console.log(article_json);
 
@@ -251,7 +257,7 @@ function ClickMainClum(obj) {
   WriteFile("read", obj.id); //データベースに記事を登録する
   LogWriteFile(obj.id + ":読みたい記事リストへ登録");
   CreateClum(workBlockElement, obj.id, "read"); //右コラムを作成する
-
+  read_article_list.push(obj.id);
 
 
   //半透明化する場合は以下の処理を行う（*stu1=読みたい記事として既に選択している場合）
@@ -288,6 +294,7 @@ function DeleteArticle(obj) {
   WriteFile("noread", obj.id); //データベースに記事を登録する
   CreateClum(workBlockElement, obj.id, "delete"); //左コラムを作成する
   LogWriteFile(obj.id + ":読みたくない記事リストへ登録");
+  no_read_article_list.push(obj.id);
 
   //以下は半透明化を行う場合の処理（*記事を選択していない場合のみ処理を完了させる）
   // if (workBlockElement.className == "work-block stu0") {
@@ -315,6 +322,8 @@ function WriteFile(article_abs, article_id) {
 
   xmlHttpReq.open("GET", cmd + fileName + data, true); //ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス
   xmlHttpReq.send(null); //サーバーへのリクエストを送信する、引数はPOSTのときのみ利用
+
+
 }
 
 /*
@@ -368,6 +377,16 @@ function ReWriteFile(article_abs, article_id) {
 
   xmlHttpReq.open("GET", cmd + fileName + data, true); //ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス
   xmlHttpReq.send(null); //サーバーへのリクエストを送信する、引数はPOSTのときのみ利用
+
+  if (article_abs == "read") {
+    read_article_list = read_article_list.filter(function (a) {
+      return a !== article_id;
+    });
+  } else {
+    no_read_article_list = no_read_article_list.filter(function (a) {
+      return a !== article_id;
+    });
+  }
 }
 
 /*
@@ -377,10 +396,11 @@ function ReWriteFile(article_abs, article_id) {
 function WriteAllToNoReadFile() {
   LogWriteFile("選択記事の削除");
   if (document.getElementsByClassName("want_read_article").length == 0) {
-    console.log("対象の記事が存在しません");
+    console.log("削除対象の記事が存在しません");
     return;
   }
 
+  read_article_list = [];
   let xmlHttpReq = new XMLHttpRequest();
   let cmd = "./rb/index.rb?cmd=transAll";
   xmlHttpReq.open("GET", cmd, true);
@@ -390,7 +410,8 @@ function WriteAllToNoReadFile() {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
       let list = xmlHttpReq.responseText.split(/\n/);
       for (let i = 0; i < list.length; i++) {
-        console.log(list[i]);
+        no_read_article_list.push(list[i]);
+
         if (list[i] == "") {
           console.log("リストへの反映が終了");
           break;
@@ -451,28 +472,21 @@ function CreateClum(workBlockElement, id, select) {
     false
   );
 
+  //1行目をジャンル、2行目を見出し、3行目以降を本文として扱う
+  //行単位に文章を分割する
+  let txt_array = article_json[id].split(/\r?\n/);
+
   //h3要素（見出し）の作成
   let h3Element = document.createElement("h3");
-  h3Element.innerHTML = workBlockElement.getElementsByTagName(
-    "h3"
-  )[0].innerHTML;
+  h3Element.innerHTML = txt_array[1];
 
   //h4要素（ジャンル）の作成
   let h4Element = document.createElement("h4");
-  h4Element.innerHTML = workBlockElement.getElementsByTagName(
-    "h4"
-  )[0].innerHTML;
+  h4Element.innerHTML = txt_array[0];
   ArticleElement.classList.add(h4Element.innerHTML.replace("#", ""));
-
-  //p要素（スニペッド）の作成
-  let pElement = document.createElement("p");
-  pElement.innerHTML = workBlockElement.getElementsByTagName(
-    "p"
-  )[0].innerHTML;
 
   ArticleElement.appendChild(h3Element);
   ArticleElement.appendChild(h4Element);
-  ArticleElement.appendChild(pElement);
   ArticlesElement[0].appendChild(ArticleElement);
 }
 
@@ -493,6 +507,13 @@ function ReadListFile(article_abs) {
   xmlHttpReq.onreadystatechange = function () {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
       list = xmlHttpReq.responseText.split(/\n/);
+
+      if (article_abs == "read") {
+        read_article_list = list;
+      } else {
+        no_read_article_list = list;
+      }
+
       for (let i = 0; i < list.length - 1; i++) {
         if (list[i] == "") {
           console.log("リストへの反映が終了");
