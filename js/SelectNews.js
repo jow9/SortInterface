@@ -130,6 +130,20 @@ function ReadArticle() {
   }
 }
 
+function AddToNoDisplyList() {
+  let ran = Math.floor(Math.random() * no_disply_list.length);
+
+  let workBlockElement = document.getElementById(no_disply_list[ran]);
+  workBlockElement.classList.remove("stu2");
+  workBlockElement.classList.add("stu0");
+
+  no_disply_list = no_disply_list.filter(function (a) {
+    return a !== no_disply_list[ran];
+  });
+  display_list.push(no_disply_list[ran]);
+}
+
+
 /*
 //記事リストを作成する
 */
@@ -137,30 +151,22 @@ function CreateArticleList() {
   console.log(Object.keys(article_json).length);
   console.log(article_json);
 
-  for (let i = 0; i < 4; i++) {
-    let ran = Math.floor(Math.random() * no_disply_list.length);
-    display_list.push(no_disply_list[ran]);
-
-    no_disply_list = no_disply_list.filter(function (a) {
-      return a !== no_disply_list[ran];
-    });
-  }
-
   for (let i = 0; i < Object.keys(article_json).length; i++) {
     let articleID = ('000' + i).slice(-3);
 
     //work-block要素の作成
     let workBlockElement = document.createElement("div");
     workBlockElement.id = articleID;
+    workBlockElement.className = "work-block stu2 now-sort-selected"; //stu0：未選択状態（デフォルト）, stu1：選択状態（半透明化）, stu2：コラムから除外した状態（非表示）
 
     //read_listに合わせてクラス名（stuの状態）を変更する
-    if (read_article_list.indexOf(articleID) != -1 || no_read_article_list.indexOf(articleID) != -1) {
+    /*if (read_article_list.indexOf(articleID) != -1 || no_read_article_list.indexOf(articleID) != -1) {
       workBlockElement.className = "work-block stu2 now-sort-selected"; //stu0：未選択状態（デフォルト）, stu1：選択状態（半透明化）, stu2：コラムから除外した状態（非表示）
     } else if (display_list.indexOf(articleID) != -1) {
       workBlockElement.className = "work-block stu0 now-sort-selected";
     } else {
       workBlockElement.className = "work-block stu2 now-sort-selected"; //stu0：未選択状態（デフォルト）, stu1：選択状態（半透明化）, stu2：コラムから除外した状態（非表示）
-    }
+    }*/
 
     workBlockElement.addEventListener(
       "click",
@@ -194,6 +200,7 @@ function CreateArticleList() {
       function (e) {
         if (nowActiveClum == "centerclum") {
           ClickMainClum({ id: articleID });
+          AddToNoDisplyList();
           e.stopPropagation();
         }
       },
@@ -205,6 +212,7 @@ function CreateArticleList() {
       function (e) {
         if (nowActiveClum == "centerclum") {
           DeleteArticle({ id: articleID });
+          AddToNoDisplyList();
           e.stopPropagation();
         }
       },
@@ -256,6 +264,10 @@ function CreateArticleList() {
     workBlockElement.appendChild(toMoveRightClumElement);
     workBlockElement.appendChild(toMoveLeftClumElement);
     worksElement[0].appendChild(workBlockElement); //設定されたIDと登録順序が通信速度の差でずれてしまう
+  }
+
+  for (let i = 0; i < 4; i++) {
+    AddToNoDisplyList();
   }
 
   /*左右コラムを作成する*/
@@ -364,8 +376,6 @@ function WriteFile(article_abs, article_id) {
 
   xmlHttpReq.open("GET", cmd + fileName + data, true); //ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス
   xmlHttpReq.send(null); //サーバーへのリクエストを送信する、引数はPOSTのときのみ利用
-
-
 }
 
 /*
