@@ -4,11 +4,11 @@ var rightClumWrapperElement = document.getElementsByClassName("rightclum-wrapper
 var centerClumWrapperElement = document.getElementsByClassName("centerclum-wrapper");
 var nowActiveClum = "centerclum";
 
-var article_json;//記事のリスト
-var read_article_list = [];
-var no_read_article_list = [];
-
-
+var article_json;//全記事データ
+var read_article_list = [];//選択済み記事リスト
+var no_read_article_list = [];//ゴミ箱記事リスト
+var display_list = [];//メインコラムに表示中のリスト
+var no_disply_list = [];//非表示の記事リスト
 
 window.onload = function () {
   console.log("Onload SelectNews.js file");
@@ -48,7 +48,9 @@ window.onload = function () {
   );
 
   LogWriteFile("画面のリロード");
-  //CreateMainClum();
+
+  //記事データの読み込み→読みたい記事リストの読み込み→読みたくない記事リストの読み込みを終えた後にコラムの作成を行う
+  //ReadArticle() →  ReadListFile("read") → ReadListFile("noread") → CreateArticleList()の順に関数を呼び出す
   ReadArticle();
 };
 
@@ -119,28 +121,46 @@ function ReadArticle() {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
       //テキストの編集
       article_json = xmlHttpReq.response;
-      //ReadListFile("read");
-      //ReadListFile("noread");
-      CreateArticleList();
+
+      for (let i = 0; i < Object.keys(article_json).length; i++) {
+        no_disply_list.push(('000' + i).slice(-3));
+      }
+      ReadListFile("read");
     }
   }
 }
 
-
 /*
-//メインカラムに記事のリストを作成する
+//記事リストを作成する
 */
 function CreateArticleList() {
   console.log(Object.keys(article_json).length);
   console.log(article_json);
+
+  for (let i = 0; i < 4; i++) {
+    let ran = Math.floor(Math.random() * no_disply_list.length);
+    display_list.push(no_disply_list[ran]);
+
+    no_disply_list = no_disply_list.filter(function (a) {
+      return a !== no_disply_list[ran];
+    });
+  }
 
   for (let i = 0; i < Object.keys(article_json).length; i++) {
     let articleID = ('000' + i).slice(-3);
 
     //work-block要素の作成
     let workBlockElement = document.createElement("div");
-    workBlockElement.className = "work-block stu0 now-sort-selected"; //stu0：未選択状態（デフォルト）, stu1：選択状態（半透明化）, stu2：コラムから除外した状態（非表示）
     workBlockElement.id = articleID;
+
+    //read_listに合わせてクラス名（stuの状態）を変更する
+    if (read_article_list.indexOf(articleID) != -1 || no_read_article_list.indexOf(articleID) != -1) {
+      workBlockElement.className = "work-block stu2 now-sort-selected"; //stu0：未選択状態（デフォルト）, stu1：選択状態（半透明化）, stu2：コラムから除外した状態（非表示）
+    } else if (display_list.indexOf(articleID) != -1) {
+      workBlockElement.className = "work-block stu0 now-sort-selected";
+    } else {
+      workBlockElement.className = "work-block stu2 now-sort-selected"; //stu0：未選択状態（デフォルト）, stu1：選択状態（半透明化）, stu2：コラムから除外した状態（非表示）
+    }
 
     workBlockElement.addEventListener(
       "click",
@@ -238,8 +258,30 @@ function CreateArticleList() {
     worksElement[0].appendChild(workBlockElement); //設定されたIDと登録順序が通信速度の差でずれてしまう
   }
 
-  ReadListFile("read");
-  ReadListFile("noread");
+  /*左右コラムを作成する*/
+  for (let i = 0; i < read_article_list.length - 1; i++) {
+    if (read_article_list[i] == "") {
+      console.log("リストへの反映が終了");
+      break;
+    }
+    console.log(read_article_list[i] + "番目の記事を読みたいリストに読み込む");
+    let workBlockElement = document.getElementById(read_article_list[i]);
+    workBlockElement.classList.remove("stu0");
+    workBlockElement.classList.add("stu2");
+    CreateClum(workBlockElement, read_article_list[i], "read"); //右コラムを作成する
+  }
+
+  for (let i = 0; i < no_read_article_list.length - 1; i++) {
+    if (no_read_article_list[i] == "") {
+      console.log("リストへの反映が終了");
+      break;
+    }
+    console.log(no_read_article_list[i] + "番目の記事を読みたいリストに読み込む");
+    let workBlockElement = document.getElementById(no_read_article_list[i]);
+    workBlockElement.classList.remove("stu0");
+    workBlockElement.classList.add("stu2");
+    CreateClum(workBlockElement, no_read_article_list[i], "delete"); //左コラムを作成する
+  }
 }
 
 
@@ -378,6 +420,7 @@ function ReWriteFile(article_abs, article_id) {
   xmlHttpReq.open("GET", cmd + fileName + data, true); //ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス
   xmlHttpReq.send(null); //サーバーへのリクエストを送信する、引数はPOSTのときのみ利用
 
+  no_disply_list.push(article_id);
   if (article_abs == "read") {
     read_article_list = read_article_list.filter(function (a) {
       return a !== article_id;
@@ -510,26 +553,26 @@ function ReadListFile(article_abs) {
 
       if (article_abs == "read") {
         read_article_list = list;
+
+        //no_disply_listから選択済みの記事を削除する
+        for (let i = 0; i < read_article_list.length; i++) {
+          no_disply_list = no_disply_list.filter(function (a) {
+            return a !== read_article_list[i];
+          });
+        }
+
+        ReadListFile("noread");
       } else {
         no_read_article_list = list;
-      }
 
-      for (let i = 0; i < list.length - 1; i++) {
-        if (list[i] == "") {
-          console.log("リストへの反映が終了");
-          break;
+        //no_disply_listから選択済みの記事を削除する
+        for (let i = 0; i < no_read_article_list.length; i++) {
+          no_disply_list = no_disply_list.filter(function (a) {
+            return a !== no_read_article_list[i];
+          });
         }
-        console.log(list[i] + "番目の記事を読みたいリストに読み込む");
-        let workBlockElement = document.getElementById(list[i]);
-        if (article_abs == "read") {
-          workBlockElement.classList.remove("stu0");
-          workBlockElement.classList.add("stu2");
-          CreateClum(workBlockElement, list[i], "read"); //右コラムを作成する
-        } else if (article_abs == "noread") {
-          workBlockElement.classList.remove("stu0");
-          workBlockElement.classList.add("stu2");
-          CreateClum(workBlockElement, list[i], "delete");
-        }
+
+        CreateArticleList();
       }
     }
   };
