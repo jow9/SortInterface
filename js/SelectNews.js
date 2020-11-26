@@ -132,15 +132,15 @@ function ReadArticle() {
 
 //渡されたオブジェクトに対してランダムな記事要素を挿入する
 function AddToNoDisplyList(obj) {
-  console.log(display_list);
-  console.log(no_display_list);
+  console.log("display_list:" + display_list);
+  console.log("no_display_list:" + no_display_list);
 
   if (no_display_list.length <= 0) {
     console.log("これ以上候補となる記事はありません．");
     let h3Element = obj.getElementsByTagName("h3")[0];
-    h3Element.innerHTML = "--";
+    h3Element.innerHTML = "No Article";
     let h4Element = obj.getElementsByTagName("h4")[0];
-    h4Element.innerHTML = "#--";
+    h4Element.innerHTML = "";
     let imgElement = obj.getElementsByTagName("img")[0];
     imgElement.src = "";
 
@@ -159,6 +159,12 @@ function AddToNoDisplyList(obj) {
   h4Element.innerHTML = "#" + txt_array[0];
   let imgElement = obj.getElementsByTagName("img")[0];
   imgElement.src = txt_array[2];
+  if (imgElement.src == "") {
+    imgElement.onerror = function () {
+      this.style.display = "none";
+    };
+  }
+
 
   /*let pElement = document.createElement("p");
   let index = txt_array[3].indexOf("。"); //句点で本文を区切り最初の一文をアブストとして扱う
@@ -187,33 +193,6 @@ function CreateArticleList() {
     workBlockElement.addEventListener(
       "click",
       function (e) {
-        DeleteToMoveClum();//別の記事の選択中だった場合それを削除
-        if (nowActiveClum == "centerclum" && workBlockElement.classList.contains("selecting") == false) {
-          workBlockElement.classList.add("selecting");
-          e.stopPropagation();
-        } else if (nowActiveClum == "centerclum" && workBlockElement.classList.contains("selecting")) {
-          workBlockElement.classList.remove("selecting");
-          e.stopPropagation();
-        }
-      },
-      false
-    );
-
-    let toMoveRightClumElement = document.createElement("div");
-    toMoveRightClumElement.className = "to-move-right-clum-button";
-    let rightClumh2Element = document.createElement("h2");
-    rightClumh2Element.innerHTML = "読む";
-    toMoveRightClumElement.appendChild(rightClumh2Element);
-
-    let toMoveLeftClumElement = document.createElement("div");
-    toMoveLeftClumElement.className = "to-move-left-clum-button";
-    let leftClumh2Element = document.createElement("h2");
-    leftClumh2Element.innerHTML = "読まない";
-    toMoveLeftClumElement.appendChild(leftClumh2Element);
-
-    toMoveRightClumElement.addEventListener(
-      "click",
-      function (e) {
         if (nowActiveClum == "centerclum") {
           ClickMainClum(workBlockElement);
           AddToNoDisplyList(workBlockElement);
@@ -223,6 +202,31 @@ function CreateArticleList() {
       },
       false
     );
+
+    // let toMoveRightClumElement = document.createElement("div");
+    // toMoveRightClumElement.className = "to-move-right-clum-button";
+    // let rightClumh2Element = document.createElement("h2");
+    // rightClumh2Element.innerHTML = "読む";
+    // toMoveRightClumElement.appendChild(rightClumh2Element);
+
+    let toMoveLeftClumElement = document.createElement("div");
+    toMoveLeftClumElement.className = "to-move-left-clum-button";
+    let leftClumimgElement = document.createElement("img");
+    leftClumimgElement.src = "src/img/trash.png";
+    toMoveLeftClumElement.appendChild(leftClumimgElement);
+
+    // toMoveRightClumElement.addEventListener(
+    //   "click",
+    //   function (e) {
+    //     if (nowActiveClum == "centerclum") {
+    //       ClickMainClum(workBlockElement);
+    //       AddToNoDisplyList(workBlockElement);
+
+    //       e.stopPropagation();
+    //     }
+    //   },
+    //   false
+    // );
 
     toMoveLeftClumElement.addEventListener(
       "click",
@@ -251,24 +255,23 @@ function CreateArticleList() {
     let workImgElement = document.createElement("div");
     workImgElement.className = "workImg";
     let imgElement = document.createElement("img");
-    imgElement.onerror = function () {
-      this.style.display = "none";
-    };
 
     work_txtElement.appendChild(h3Element);
     work_txtElement.appendChild(h4Element);
     //work_txtElement.appendChild(pElement);
-    workElement.insertBefore(
-      work_txtElement,
-      workElement.firstChild
-    );
-
     workImgElement.appendChild(imgElement);
     workElement.appendChild(workImgElement);
+    workElement.appendChild(work_txtElement);
+
+    // workElement.insertBefore(
+    //   work_txtElement,
+    //   workElement.firstChild
+    // );
+
 
     //構造体の制作
     workBlockElement.appendChild(workElement);
-    workBlockElement.appendChild(toMoveRightClumElement);
+    //workBlockElement.appendChild(toMoveRightClumElement);
     workBlockElement.appendChild(toMoveLeftClumElement);
     worksElement[0].appendChild(workBlockElement); //設定されたIDと登録順序が通信速度の差でずれてしまう
 
@@ -304,6 +307,10 @@ function CreateArticleList() {
 */
 function ClickMainClum(obj) {
   let id = obj.id;
+  if (id == "") {
+    console.log("記事の選択されていません");
+    return;
+  }
   console.log("mainClumeで" + id + "番の記事をリスト化する");
 
   /*要素の取得*/
@@ -327,6 +334,10 @@ function ClickMainClum(obj) {
 */
 function DeleteArticle(obj) {
   let id = obj.id;
+  if (id == "") {
+    console.log("記事の選択されていません");
+    return;
+  }
   console.log(
     "mainClumeで" + id + "番の記事を読みたくない記事として登録する"
   );
@@ -506,7 +517,7 @@ function CreateClum(workBlockElement, id, select) {
         if (display_list.length < 4) {
           for (let i = 0; i < 4; i++) {
             let searchObj = document.getElementsByClassName("work-block")[i];
-            if (searchObj.getElementsByTagName("h3")[0].innerHTML == "--") {
+            if (searchObj.getElementsByTagName("h3")[0].innerHTML == "No Article") {
               AddToNoDisplyList(searchObj);
               break;
             }
@@ -520,7 +531,6 @@ function CreateClum(workBlockElement, id, select) {
 
   //1行目をジャンル、2行目を見出し、3行目を画像、4行目以降を本文として扱う
   //行単位に文章を分割する
-  console.log(id);
   let txt_array = article_json[id].split(/\r?\n/);
 
   //h3要素（見出し）の作成

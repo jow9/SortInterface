@@ -30,6 +30,8 @@ body {
   padding: 20px;
   font-size: 0; /*要素同士をぴったりくっつけるための処理、不要な改行を消す*/
   
+  width: 100%;
+  height: 100%;
   /* border: medium solid #4682b4; デバッグ用 */
 }
 
@@ -39,6 +41,10 @@ p {
 
 h1 {
   font-size: 30px;
+  position: fixed;
+  top: 10px;
+  left: 30px;
+  color: #052c42;
 }
 
 h2 {
@@ -46,8 +52,8 @@ h2 {
 }
 
 h3 {
-  font-size: 14px;
-  margin: 5px 0;
+  font-size: 12px;
+  margin: 10px 0;
 }
 
 li {
@@ -74,8 +80,15 @@ a {
   position: absolute;
   height: 100vh;
   margin: 0;
+  
+  /* border: 1px solid #2b2b2b; */
 }
 
+.centerclum-wrapper .container{
+  -webkit-box-align: center;
+     -ms-flex-align: center;
+        align-items: center;
+}
 
 
 /* .leftclum-wrapper::before {
@@ -91,18 +104,18 @@ a {
 }  */
 
 .rightclum-wrapper, .leftclum-wrapper{
-  right: 30px; /*MoveViewPageの分*/
-  width: calc(25% - 30px);
+  right: 0px; /*MoveViewPageの分*/
+  width: 30px;
   max-height: 50%;
   min-height: 50%;
-  background: #d3eafa;
+  background: #9bd5ff;
   text-align: right;
   top: 0;
 }
 
 
 .leftclum-wrapper{
-  background: #f8dee2;
+  background: #fc94a4;
   top: 50%;
 }
 
@@ -129,20 +142,21 @@ a {
 }
 .no-active-clum.centerclum-wrapper:hover {
   background: #e4e4e4;
-  border: 2px solid #2b2b2b;
+  /* border: 2px solid #2b2b2b; */
   transition: all 200ms 0s ease;
 }
 .no-active-clum.centerclum-wrapper:hover .container {
-  color:#2b2b2b;
+  color:#6e6e6e;
   transition: all 200ms 0s ease;
 }
 
 
 .centerclum-wrapper {
   left: 0;
-  width: 75%;
-  min-height: 100%;
-  background: #f5f5f5;
+  width: calc(100% - 30px);
+  height: calc(100% - 30px);
+  background: #ffffff;
+  /* border: 2px solid #2b2b2b; */
 }
 
 /* .centerclum-wrapper::before {
@@ -159,18 +173,19 @@ a {
 
 .MoveViewPage {
   position: fixed;
-  width: 30px;
-  min-height: 100vh;
+  height: 30px;
+  width: calc(100% - 30px);
   /* height: 40px; */
-  background-color: #ff6347;
-  right: 0px;
+  background-color: #203744;
   bottom: 0px;
   z-index: 3;
+
+  transition: all 100ms 0s ease;
 }
 
 .MoveViewPage:hover {
   cursor: pointer;
-  background: #ff7f50;
+  background: #2d5b75;
 }
 
 .MoveViewPage .arow_box {
@@ -178,38 +193,42 @@ a {
 } 
 
 .MoveViewPage img {
-  width: 30%;
+  height: 60%;
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   margin: auto;
-  transform: rotate(180deg);
+  transform: rotate(270deg);
 }
 
 
 .work {
   width: 100%;
-  height: calc(100% - 6px);
-  margin: 10px 0px;
+  height: 100%;
   padding: 10px;
-  border: solid 1.5px #5d5d5d;
   text-align: left;
-
-  transition: all 250ms 0s ease;
 }
 
-.now-active-clum .work:hover {
-  background-color: #e2e2e2;
+.now-active-clum .work-block:hover {
+  box-shadow:0px 0px 13px;
   cursor: pointer;
 }
 
 .work-block{
   position: relative;
+  width: 25%;
+  margin: 40px 10px;
+  /* border: solid 1.5px #5d5d5d; */
+  border-radius: 10px;
+  box-shadow:0px 0px 7px;
+  /* filter: drop-shadow(10px 10px 10px rgba(0,0,0,0.6)); */
+
+  transition: all 300ms 0s ease;
 }
 
-.to-move-right-clum-button,
+/* .to-move-right-clum-button,
 .to-move-left-clum-button {
   border-radius: 10px 10px 10px 10px;
   display: none;
@@ -232,9 +251,9 @@ a {
   top: 50%;
   -webkit-transform : translateY(-50%);
   transform : translateY(-50%);
-}
+} */
 
-.to-move-right-clum-button:hover,
+/* .to-move-right-clum-button:hover,
 .to-move-left-clum-button:hover {
   opacity: 1;
 }
@@ -248,20 +267,39 @@ a {
   background: #000080;
   right: 1%;
   top: 5%;
+} */
+
+.to-move-left-clum-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  filter: drop-shadow(0px 0px 2px rgba(0,0,0,1));
+  opacity: 0.4;
+
+  transition: all 300ms 0s ease;
 }
 
-.to-move-left-clum-button{
-  background: #dc143c;
-  left: 1%;
-  top: 5%;
+.to-move-left-clum-button img{ 
+  width: 100%;
+  height: 100%;
+}
+
+.to-move-left-clum-button:hover {
+  filter: drop-shadow(0px 0px 4px rgba(0,0,0,1));
+  opacity: 1;
 }
 
 
 /*画像と文字を横に並べる*/
 .work-txt {
-  vertical-align: top;
-  display: inline-block;
-  width: 70%;
+  /* vertical-align: top; */
+  /* display: inline-block; */
+  
+  width: 100%;
+  height: 50%;
 }
 
 h3 {
@@ -278,17 +316,16 @@ h4 {
 }
 
 .workImg {
-  display: inline-block;
-  /*overflow: hidden;*/
-  width: 30%;
-  padding: 10px;
-  float: right;
+  /* display: inline-block; */
+  overflow: hidden;
+  width: 100%;
+  padding: 5px;
+  height: 50%;
 }
 
 .workImg img {
-  max-width: 100%;
-  max-height: 150px;
-  float: right;
+  width: 100%;
+  
 }
 
 .work:after {
@@ -297,11 +334,39 @@ h4 {
   display: block;
 }
 
+.works {
+  padding: 50px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+     -ms-flex-direction: row;
+         flex-direction: row;
+
+  -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+
+  -ms-flex-pack: distribute;
+  justify-content: space-around;
+
+  -webkit-box-align: center;
+     -ms-flex-align: center;
+        align-items: center;
+
+        -webkit-box-align: stretch;
+     -ms-flex-align: stretch;
+        align-items: stretch;
+
+  height: 100%;
+}
+
 .works input {
   display: none;
 }
 
-.works .stu0 {
+/* .works .stu0 {
   opacity: 1;
 }
 
@@ -311,7 +376,7 @@ h4 {
 
 .works .stu2 {
   display: none;
-}
+} */
 
 .drop-list{
   position: absolute;
@@ -321,10 +386,6 @@ h4 {
 
 
 /*createdclum*/
-.delete_articles,
-.want_read_articles {
-  
-}
 
 .delete_article ,
 .want_read_article  {
@@ -336,12 +397,12 @@ h4 {
 }
 
 .now-active-clum .delete_article:hover{
-  background: #ffcece;
+  background: #ff7b7b;
   cursor: pointer;
 }
 
 .now-active-clum .want_read_article:hover {
-  background: #cdd6ff;
+  background: #6a77ad;
   cursor: pointer;
 }
 
@@ -367,7 +428,7 @@ h4 {
 .read_finish_button {
   z-index: 3;
   position: fixed;
-  bottom: 20px;
+  bottom: 50px;
   right: 50px;
   border: 0px;
   background: #203744;
@@ -380,7 +441,7 @@ h4 {
 }
 
 .read_finish_button:hover {
-  background: #4682b4;
+  background: #2d5b75;
 }
 
 
@@ -388,22 +449,21 @@ h4 {
 .now-active-clum {
   z-index: 3;
   /* background: #f5f5f5; */
-  border: 4px solid #2b2b2b;
   box-shadow:0px 0px 25px;
   overflow-y: scroll;
   -ms-overflow-style: none;    /* IE, Edge 対応 */
         scrollbar-width: none;       /* Firefox 対応 */
-  
-  transition: all 100ms 0s ease;
+  width:calc(100% - 30px);
+  /* border: 3px solid #2b2b2b; */
+  transition: all 300ms 0s ease;
 }
 .now-active-clum::-webkit-scrollbar {  /* Chrome, Safari 対応 */
   display:none;
 }
 
 .no-active-clum {
-  opacity: 0.2;
+  /* opacity: 1; */
   overflow-y: hidden;
-  border: 2px solid #2b2b2b;
 }
 
 /* 
@@ -423,9 +483,9 @@ h4 {
 
 .layer2 {
   z-index: 2;
-  opacity: 1;
+  /* opacity: 1; */
   background: #ffffff;
-  border: 2px solid rgba(0,0,0,0.3);
+  /* border: 2px solid rgba(0,0,0,0.3); */
   /* background: #ececec; */
   box-shadow:0px 0px 25px;
 }
