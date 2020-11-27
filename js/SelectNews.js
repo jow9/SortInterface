@@ -1,3 +1,7 @@
+import anime from './node_modules/animejs/lib/anime.es.js';
+//エラー:import declarations may only appear at top level of a module
+//解決：moduleを利用するときはhtmlファイルでjsファイルを呼ぶ時にtype=moduleを宣言する必要がある
+
 var worksElement = document.getElementsByClassName("works");
 var leftClumWrapperElement = document.getElementsByClassName("leftclum-wrapper");
 var rightClumWrapperElement = document.getElementsByClassName("rightclum-wrapper");
@@ -11,6 +15,7 @@ var display_list = [];//メインコラムに表示中のリスト
 var no_display_list = [];//非表示の記事リスト
 
 window.onload = function () {
+
   console.log("Onload SelectNews.js file");
 
   let moveElement = document.getElementsByClassName("MoveViewPage");
@@ -193,12 +198,23 @@ function CreateArticleList() {
     workBlockElement.addEventListener(
       "click",
       function (e) {
-        if (nowActiveClum == "centerclum") {
-          ClickMainClum(workBlockElement);
-          AddToNoDisplyList(workBlockElement);
-
-          e.stopPropagation();
-        }
+        anime({
+          targets: workBlockElement,
+          opacity: 0,
+          duration: 800,
+          complete: function () {
+            if (nowActiveClum == "centerclum") {
+              ClickMainClum(workBlockElement);
+              AddToNoDisplyList(workBlockElement);
+              anime({
+                targets: workBlockElement,
+                opacity: 1,
+                delay: 300,
+              })
+              e.stopPropagation();
+            }
+          }
+        })
       },
       false
     );
@@ -232,10 +248,23 @@ function CreateArticleList() {
       "click",
       function (e) {
         if (nowActiveClum == "centerclum") {
-          DeleteArticle(workBlockElement);
-          AddToNoDisplyList(workBlockElement);
-
-          e.stopPropagation();
+          anime({
+            targets: workBlockElement,
+            opacity: 0,
+            duration: 800,
+            complete: function () {
+              if (nowActiveClum == "centerclum") {
+                DeleteArticle(workBlockElement);
+                AddToNoDisplyList(workBlockElement);
+                anime({
+                  targets: workBlockElement,
+                  opacity: 1,
+                  delay: 300,
+                })
+                e.stopPropagation();
+              }
+            }
+          })
         }
       },
       false
@@ -563,7 +592,7 @@ function ReadListFile(article_abs) {
 
   xmlHttpReq.onreadystatechange = function () {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
-      list = xmlHttpReq.responseText.split(/\n/);
+      let list = xmlHttpReq.responseText.split(/\n/);
 
       if (article_abs == "read") {
         read_article_list = list;
