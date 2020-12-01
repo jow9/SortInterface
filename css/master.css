@@ -10,7 +10,7 @@
 
 body {
   margin: 0;
-  background-color: #ffffff;
+  background-color: #fafcff;
   font-family: "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴシック",
     "ヒラギノ丸ゴ ProN", "serif", "YuGothic", "Yu Gothic";
   /*min-height: 100vh;
@@ -77,7 +77,8 @@ a {
 
 .leftclum-wrapper,
 .centerclum-wrapper,
-.rightclum-wrapper {
+.rightclum-wrapper,
+.readclum-wrapper {
   position: absolute;
   /* height: 100vh; */
   margin: 0;
@@ -98,9 +99,9 @@ a {
   height: 30px;
   text-align: left;
   top: 0;
-  z-index: 2;
-  border: 1px solid #ffffff;
-  border-radius: 2px;
+  z-index: 3;
+  border: 1px solid #fafcff;
+  border-radius: 4px;
 }
 
 .rightclum-wrapper{
@@ -116,6 +117,7 @@ a {
 .no-active-clum.rightclum-wrapper:hover,
 .no-active-clum.leftclum-wrapper:hover{
   /* opacity: 0.5; */
+  cursor: pointer;
   transition: all 200ms 0s ease;
 }
 .no-active-clum.centerclum-wrapper:hover {
@@ -142,10 +144,21 @@ a {
 
 .centerclum-wrapper {
   left: 0;
+  top: 0px;
   width: 100%;
-  height: calc(100% - 30px);
-  background: #ffffff;
+  height: calc(100vh - 30px);
+  padding-bottom: 30px;
+  /* background: #ffffff; */
   /* border: 2px solid #2b2b2b; */
+}
+
+.readclum-wrapper {
+  width: 95%;
+  height: 20vh;
+  bottom: 30px;
+  left: 0;
+  z-index: 1;
+  /* overflow: hidden; */
 }
 
 .MoveViewPage {
@@ -155,7 +168,7 @@ a {
   /* height: 40px; */
   background-color: #203744;
   bottom: 0px;
-  z-index: 2;
+  z-index: 3;
 
   transition: all 100ms 0s ease;
 }
@@ -194,12 +207,14 @@ a {
   position: relative;
   width: 25%;
   margin: 40px 10px;
-  /* border: solid 1.5px #5d5d5d; */
+  /* border: solid 2px #070707; */
   border-radius: 10px;
-  box-shadow:0px 0px 7px;
+  box-shadow:0px 0px 4px;
   /* filter: drop-shadow(10px 10px 10px rgba(0,0,0,0.6)); */
+  background: #fafcff;
+  z-index: 2;
 
-  transition: all 300ms 0s ease;
+  transition: all 200ms 0s ease;
 }
 
 .to-move-left-clum-button {
@@ -268,7 +283,7 @@ h4 {
 }
 
 .works {
-  padding: 50px;
+  padding: 30px;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -321,7 +336,8 @@ h4 {
 /*createdclum*/
 .delete_article ,
 .want_read_article  {
-  border: 2px solid #2b2b2b;
+  border: 1.5px solid #2b2b2b;
+  border-radius: 3px;
   margin: 10px 10px;
   padding: 5px;
 
@@ -329,12 +345,12 @@ h4 {
 }
 
 .now-active-clum .delete_article:hover{
-  background: #f8a6a6;
+  background: #fddcdc;
   cursor: pointer;
 }
 
 .now-active-clum .want_read_article:hover {
-  background: #97aaf7;
+  background: #d5ddff;
   cursor: pointer;
 }
 
@@ -348,6 +364,54 @@ h4 {
 .want_read_article:not(.now-sort-selected),
 .delete_article:not(.now-sort-selected){
   display: none;
+}
+
+.next_read_articles {
+  width: 100%;
+  height: 100%;
+
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+
+  -ms-flex-wrap: wrap-reverse;
+      flex-wrap: wrap-reverse;
+
+  -ms-flex-line-pack: start;
+      align-content: flex-start;
+}
+
+.next_read_article {
+  border: 1px solid #b2c3cc;
+  border-radius: 3px;
+  padding: 5px;
+  margin: 0 0 5px 5px;
+  width: 150px;
+  line-height: 7px;
+  opacity: 0.5;
+  color: #203744;
+  transition: all 200ms 0s ease;
+}
+
+.next_read_article:hover{
+  opacity: 1;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.next_read_article p {
+  font-size: 8px;
+  margin: 0px;
+  margin-left: 3px;
+  display: inline;
+}
+
+.next_read_article h4 {
+  font-size: 8px;
+  margin: 0;
+  padding: 0;
+  font-style: normal;
+  display: inline;
 }
 
 
@@ -380,7 +444,6 @@ h4 {
 /*now-activeなコラムスタイル*/
 .now-active-clum {
   /* background: #f5f5f5; */
-  box-shadow: 0px 0px 10px black;
   overflow-y: scroll;
   -ms-overflow-style: none;    /* IE, Edge 対応 */
         scrollbar-width: none;       /* Firefox 対応 */
@@ -392,24 +455,25 @@ h4 {
 }
 
 .now-active-clum .work-block:hover {
-  box-shadow:0px 0px 13px;
+  box-shadow:0px 0px 7px;
   cursor: pointer;
 }
 
 .now-active-clum.leftclum-wrapper, .now-active-clum.rightclum-wrapper{
-  z-index: 1;
+  z-index: 2;
   width: 400px;
   height: calc(100vh - 30px);
   padding-top: 35px;
+  box-shadow: 0px 0px 10px black;
 } 
 
 .now-active-clum.leftclum-wrapper {
   right: 0;
-  background-color:rgb(255, 204, 204);
+  background-color:#ffd4d4;
 }
 
 .now-active-clum.rightclum-wrapper {
-  background-color:rgb(164, 196, 255);
+  background-color:#d5ddff;
 }
 
 /* .no-active-clum.leftclum-wrapper:hover h2, .no-active-clum.rightclum-wrapper:hover h2{
@@ -439,7 +503,7 @@ h4 {
 .rightclum-wrapper h2, .leftclum-wrapper h2{
   position: relative;
   font-size: 16px;
-  color: #ffffff;
+  color: #fafcff;
   top: 0;
   margin: 2px auto;
   text-align: center;

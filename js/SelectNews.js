@@ -11,6 +11,7 @@ var nowActiveClum = "centerclum";
 var article_json;//全記事データ
 var read_article_list = [];//選択済み記事リスト
 var no_read_article_list = [];//ゴミ箱記事リスト
+var already_read_article_list = [];//既読記事リスト
 var display_list = [];//メインコラムに表示中のリスト
 var no_display_list = [];//非表示の記事リスト
 
@@ -52,6 +53,14 @@ window.onload = function () {
     false
   );
 
+  document.getElementsByClassName("read_finish_button")[0].addEventListener(
+    "click",
+    function () {
+      WriteAllToNoReadFile();
+    },
+    false
+  );
+
   LogWriteFile("画面のリロード");
 
   //記事データの読み込み→読みたい記事リストの読み込み→読みたくない記事リストの読み込みを終えた後にコラムの作成を行う
@@ -63,6 +72,7 @@ window.onload = function () {
 window.onclick = function () {
   DeleteToMoveClum();
 }
+
 
 
 /*
@@ -170,7 +180,6 @@ function AddToNoDisplyList(obj) {
     };
   }
 
-
   /*let pElement = document.createElement("p");
   let index = txt_array[3].indexOf("。"); //句点で本文を区切り最初の一文をアブストとして扱う
   pElement.innerHTML = txt_array[3].substring(0, index) + "。";
@@ -198,21 +207,35 @@ function CreateArticleList() {
     workBlockElement.addEventListener(
       "click",
       function (e) {
+        console.log("click");
         anime({
           targets: workBlockElement,
-          opacity: 0,
-          duration: 800,
+          // opacity: 0,
+          opacity: {
+            value: 0,
+            duration: 200,
+            endDelay: 200,
+            easing: 'easeInExpo',
+          },
+          translateY: {
+            value: 100,
+          },
           complete: function () {
-            if (nowActiveClum == "centerclum") {
-              ClickMainClum(workBlockElement);
-              AddToNoDisplyList(workBlockElement);
-              anime({
-                targets: workBlockElement,
-                opacity: 1,
-                delay: 300,
-              })
-              e.stopPropagation();
-            }
+            ClickMainClum(workBlockElement);
+            AddToNoDisplyList(workBlockElement);
+            anime({
+              targets: workBlockElement,
+              // opacity: 1,
+              opacity: {
+                value: 1,
+                duration: 200,
+                easing: 'easeInExpo',
+              },
+              translateY: {
+                value: 0,
+                duration: 0,
+              },
+            })
           }
         })
       },
@@ -250,21 +273,37 @@ function CreateArticleList() {
         if (nowActiveClum == "centerclum") {
           anime({
             targets: workBlockElement,
-            opacity: 0,
-            duration: 800,
+            // opacity: 0,
+            opacity: {
+              value: 0,
+              duration: 200,
+              endDelay: 200,
+              easing: 'easeInExpo',
+            },
+            translateY: {
+              value: -100,
+            },
             complete: function () {
               if (nowActiveClum == "centerclum") {
                 DeleteArticle(workBlockElement);
                 AddToNoDisplyList(workBlockElement);
                 anime({
                   targets: workBlockElement,
-                  opacity: 1,
-                  delay: 300,
+                  // opacity: 1,
+                  opacity: {
+                    value: 1,
+                    duration: 200,
+                    easing: 'easeInExpo',
+                  },
+                  translateY: {
+                    value: 0,
+                    duration: 0,
+                  },
                 })
-                e.stopPropagation();
               }
             }
           })
+          e.stopPropagation();
         }
       },
       false
@@ -297,7 +336,6 @@ function CreateArticleList() {
     //   workElement.firstChild
     // );
 
-
     //構造体の制作
     workBlockElement.appendChild(workElement);
     //workBlockElement.appendChild(toMoveRightClumElement);
@@ -309,14 +347,14 @@ function CreateArticleList() {
 
 
   /*左右コラムを作成する*/
-  for (let i = 0; i < read_article_list.length - 1; i++) {
-    if (read_article_list[i] == "") {
+  for (let i = 0; i < already_read_article_list.length - 1; i++) {
+    if (already_read_article_list[i] == "") {
       console.log("リストへの反映が終了");
       break;
     }
-    console.log(read_article_list[i] + "番目の記事を読みたいリストに読み込む");
-    let workBlockElement = document.getElementById(read_article_list[i]);
-    CreateClum(workBlockElement, read_article_list[i], "read"); //右コラムを作成する
+    console.log(already_read_article_list[i] + "番目の記事を読みたいリストに読み込む");
+    let workBlockElement = document.getElementById(already_read_article_list[i]);
+    CreateClum(workBlockElement, already_read_article_list[i], "alreadyread"); //右コラムを作成する
   }
 
   for (let i = 0; i < no_read_article_list.length - 1; i++) {
@@ -327,6 +365,15 @@ function CreateArticleList() {
     console.log(no_read_article_list[i] + "番目の記事を読みたいリストに読み込む");
     let workBlockElement = document.getElementById(no_read_article_list[i]);
     CreateClum(workBlockElement, no_read_article_list[i], "delete"); //左コラムを作成する
+  }
+
+  for (let i = 0; i < read_article_list.length - 1; i++) {
+    if (read_article_list[i] == "") {
+      console.log("リストへの反映が終了");
+      break;
+    }
+    console.log(read_article_list[i] + "番目の記事を読みたいリストに読み込む");
+    CreateReadClum(read_article_list[i]); //右コラムを作成する
   }
 }
 
@@ -347,7 +394,7 @@ function ClickMainClum(obj) {
 
   WriteFile("read", id); //データベースに記事を登録する
   LogWriteFile(id + ":読みたい記事リストへ登録");
-  CreateClum(workBlockElement, id, "read"); //右コラムを作成する
+  CreateReadClum(id);
 
   console.log(display_list + "から" + id + "を削除");
   read_article_list.push(id);
@@ -384,11 +431,13 @@ function DeleteArticle(obj) {
   });
 }
 
+
 /*
 //データの書き込み処理
 //読みたい記事情報の登録
 //読みたいくない記事情報の登録
-//引数1 article_abs:読みたいと読みたくないの記事の区別(文字列で　read or noread を指定する)
+//既読記事情報の登録
+//引数1 article_abs:読みたいと読みたくないの記事の区別(文字列で　read or noread or alreadyread を指定する)
 //引数2 article_id:登録する記事番号
 */
 function WriteFile(article_abs, article_id) {
@@ -460,8 +509,12 @@ function ReWriteFile(article_abs, article_id) {
     read_article_list = read_article_list.filter(function (a) {
       return a !== article_id;
     });
-  } else {
+  } else if (article_abs == "noread") {
     no_read_article_list = no_read_article_list.filter(function (a) {
+      return a !== article_id;
+    });
+  } else {
+    already_read_article_list = already_read_article_list.filter(function (a) {
       return a !== article_id;
     });
   }
@@ -473,7 +526,7 @@ function ReWriteFile(article_abs, article_id) {
 */
 function WriteAllToNoReadFile() {
   LogWriteFile("選択記事の削除");
-  if (document.getElementsByClassName("want_read_article").length == 0) {
+  if (document.getElementsByClassName("next_read_article").length == 0) {
     console.log("削除対象の記事が存在しません");
     return;
   }
@@ -488,17 +541,17 @@ function WriteAllToNoReadFile() {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
       let list = xmlHttpReq.responseText.split(/\n/);
       for (let i = 0; i < list.length; i++) {
-        no_read_article_list.push(list[i]);
+        already_read_article_list.push(list[i]);
 
         if (list[i] == "") {
           console.log("リストへの反映が終了");
           break;
         }
         let workBlockElement = document.getElementById(list[i]);
-        CreateClum(workBlockElement, list[i], "delete");
+        CreateClum(workBlockElement, list[i], "alreadyread");
 
         //要素を探索し削除
-        document.getElementById("want_read_article_" + list[i]).remove();
+        document.getElementById("next_read_article_" + list[i]).remove();
       }
     }
   };
@@ -522,10 +575,10 @@ function CreateClum(workBlockElement, id, select) {
     classElementName = "delete_article";
     ElementStatus = "noread";
     targetClumName = "leftclum";
-  } else if (select == "read") {
+  } else if (select == "alreadyread") {
     parentElementName = "want_read_articles";
     classElementName = "want_read_article";
-    ElementStatus = "read";
+    ElementStatus = "alreadyread";
     targetClumName = "rightclum";
   }
 
@@ -577,10 +630,54 @@ function CreateClum(workBlockElement, id, select) {
 }
 
 /*
+// 読みたい記事リストを作成する
+*/
+function CreateReadClum(id) {
+  let ArticlesElement = document.getElementsByClassName("next_read_articles");
+  let txt_array = article_json[id].split(/\r?\n/);
+
+  let ArticleElement = document.createElement("div");
+  ArticleElement.className = "next_read_article";
+  ArticleElement.id = "next_read_article_" + id;
+  ArticleElement.addEventListener(
+    "click",
+    function () {
+      if (nowActiveClum == "centerclum") {
+        //Listファイルから指定要素の削除
+        ReWriteFile("read", id);
+
+        no_display_list.push(id);
+        if (display_list.length < 4) {
+          for (let i = 0; i < 4; i++) {
+            let searchObj = document.getElementsByClassName("work-block")[i];
+            if (searchObj.getElementsByTagName("h3")[0].innerHTML == "No Article") {
+              AddToNoDisplyList(searchObj);
+              break;
+            }
+          }
+        }
+        ArticleElement.remove();
+      }
+    },
+    false
+  );
+
+  let pElement = document.createElement("p");
+  pElement.innerHTML = txt_array[1];
+  let h4Element = document.createElement("h4");
+  h4Element.innerHTML = "#" + txt_array[0];
+
+  ArticleElement.appendChild(h4Element);
+  ArticleElement.appendChild(pElement);
+  ArticlesElement[0].appendChild(ArticleElement);
+}
+
+/*
 //ブラウザを更新したときの処理
 //指定したファイルからデータを読み込みmainclum（とreadページ）を編集する
 //読みたいリスト、（と読みたくないリスト）からデータを取得して画面状態を生成する
 */
+//後修正
 function ReadListFile(article_abs) {
   console.log(article_abs + "にアクセス");
   var xmlHttpReq = new XMLHttpRequest();
@@ -603,9 +700,8 @@ function ReadListFile(article_abs) {
             return a !== read_article_list[i];
           });
         }
-
         ReadListFile("noread");
-      } else {
+      } else if (article_abs == "noread") {
         no_read_article_list = list;
 
         //no_display_listから選択済みの記事を削除する
@@ -614,7 +710,16 @@ function ReadListFile(article_abs) {
             return a !== no_read_article_list[i];
           });
         }
+        ReadListFile("alreadyread");
+      } else {
+        already_read_article_list = list;
 
+        //no_display_listから選択済みの記事を削除する
+        for (let i = 0; i < already_read_article_list.length; i++) {
+          no_display_list = no_display_list.filter(function (a) {
+            return a !== already_read_article_list[i];
+          });
+        }
         CreateArticleList();
       }
     }

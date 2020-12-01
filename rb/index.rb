@@ -23,14 +23,14 @@ if (cgi['cmd'] == 'read')
 
 elsif (cgi['cmd'] == 'transAll')
   readfh = open('../src/list/readArticleList.txt', "r")
-  noreadfh = open('../src/list/noreadArticleList.txt', "a")
+  alreadyreadfh = open('../src/list/alreadyreadArticleList.txt', "a")
   data = readfh.read
-  noreadfh.print data
+  alreadyreadfh.print data
   print data
 
   readfh = open('../src/list/readArticleList.txt', "w")#リストをすべて消す
   readfh.close
-  noreadfh.close
+  alreadyreadfh.close
 
 #読みたい記事、読みたくない記事の登録を行う
 elsif (cgi['cmd'] == 'add')
