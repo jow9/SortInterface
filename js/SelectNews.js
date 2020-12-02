@@ -14,6 +14,9 @@ var no_read_article_list = [];//ゴミ箱記事リスト
 var already_read_article_list = [];//既読記事リスト
 var display_list = [];//メインコラムに表示中のリスト
 var no_display_list = [];//非表示の記事リスト
+var GerneList = []; //ジャンルリスト
+
+var article_num = 4;
 
 window.onload = function () {
 
@@ -138,8 +141,20 @@ function ReadArticle() {
       article_json = xmlHttpReq.response;
 
       for (let i = 0; i < Object.keys(article_json).length; i++) {
-        no_display_list.push(('000' + i).slice(-3));
+        let id = ('000' + i).slice(-3);
+        no_display_list.push(id);
+
+        //ジャンルリストを作成
+        let txt_array = article_json[id].split(/\r?\n/);
+        GerneList.push(txt_array[0]);
       }
+
+      // ジャンルリストに重複が生まれないように余分な要素を削除
+      GerneList = GerneList.filter(function (x, i, self) {
+        return self.indexOf(x) === i;
+      });
+
+      console.log(GerneList);
       ReadListFile("read");
     }
   }
@@ -171,6 +186,7 @@ function AddToNoDisplyList(obj) {
   let h3Element = obj.getElementsByTagName("h3")[0];
   h3Element.innerHTML = txt_array[1];
   let h4Element = obj.getElementsByTagName("h4")[0];
+  h4Element.className = "gerne_" + GerneList.indexOf(txt_array[0]);
   h4Element.innerHTML = "#" + txt_array[0];
   let imgElement = obj.getElementsByTagName("img")[0];
   imgElement.src = txt_array[2];
@@ -199,7 +215,7 @@ function CreateArticleList() {
   console.log(Object.keys(article_json).length);
   console.log(article_json);
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < article_num; i++) {
     //work-block要素の作成
     let workBlockElement = document.createElement("div");
     workBlockElement.className = "work-block now-sort-selected";
@@ -210,7 +226,6 @@ function CreateArticleList() {
         console.log("click");
         anime({
           targets: workBlockElement,
-          // opacity: 0,
           opacity: {
             value: 0,
             duration: 200,
@@ -225,7 +240,6 @@ function CreateArticleList() {
             AddToNoDisplyList(workBlockElement);
             anime({
               targets: workBlockElement,
-              // opacity: 1,
               opacity: {
                 value: 1,
                 duration: 200,
@@ -242,30 +256,11 @@ function CreateArticleList() {
       false
     );
 
-    // let toMoveRightClumElement = document.createElement("div");
-    // toMoveRightClumElement.className = "to-move-right-clum-button";
-    // let rightClumh2Element = document.createElement("h2");
-    // rightClumh2Element.innerHTML = "読む";
-    // toMoveRightClumElement.appendChild(rightClumh2Element);
-
     let toMoveLeftClumElement = document.createElement("div");
     toMoveLeftClumElement.className = "to-move-left-clum-button";
     let leftClumimgElement = document.createElement("img");
     leftClumimgElement.src = "src/img/trash.png";
     toMoveLeftClumElement.appendChild(leftClumimgElement);
-
-    // toMoveRightClumElement.addEventListener(
-    //   "click",
-    //   function (e) {
-    //     if (nowActiveClum == "centerclum") {
-    //       ClickMainClum(workBlockElement);
-    //       AddToNoDisplyList(workBlockElement);
-
-    //       e.stopPropagation();
-    //     }
-    //   },
-    //   false
-    // );
 
     toMoveLeftClumElement.addEventListener(
       "click",
@@ -596,8 +591,8 @@ function CreateClum(workBlockElement, id, select) {
         ReWriteFile(ElementStatus, id);
 
         no_display_list.push(id);
-        if (display_list.length < 4) {
-          for (let i = 0; i < 4; i++) {
+        if (display_list.length < article_num) {
+          for (let i = 0; i < article_num; i++) {
             let searchObj = document.getElementsByClassName("work-block")[i];
             if (searchObj.getElementsByTagName("h3")[0].innerHTML == "No Article") {
               AddToNoDisplyList(searchObj);
@@ -637,7 +632,7 @@ function CreateReadClum(id) {
   let txt_array = article_json[id].split(/\r?\n/);
 
   let ArticleElement = document.createElement("div");
-  ArticleElement.className = "next_read_article";
+  ArticleElement.className = "next_read_article gerne_" + GerneList.indexOf(txt_array[0]);
   ArticleElement.id = "next_read_article_" + id;
   ArticleElement.addEventListener(
     "click",
@@ -647,8 +642,8 @@ function CreateReadClum(id) {
         ReWriteFile("read", id);
 
         no_display_list.push(id);
-        if (display_list.length < 4) {
-          for (let i = 0; i < 4; i++) {
+        if (display_list.length < article_num) {
+          for (let i = 0; i < article_num; i++) {
             let searchObj = document.getElementsByClassName("work-block")[i];
             if (searchObj.getElementsByTagName("h3")[0].innerHTML == "No Article") {
               AddToNoDisplyList(searchObj);
