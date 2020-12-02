@@ -634,6 +634,38 @@ function CreateReadClum(id) {
   let ArticleElement = document.createElement("div");
   ArticleElement.className = "next_read_article gerne_" + GerneList.indexOf(txt_array[0]);
   ArticleElement.id = "next_read_article_" + id;
+
+  anime({
+    targets: ArticleElement,
+    opacity: [0, 0.1],
+    duration: 700,
+    direction: 'normal',
+  });
+
+  ArticleElement.addEventListener(
+    "mouseover",
+    function () {
+      anime({
+        targets: ArticleElement,
+        opacity: 1,
+        duration: 100,
+        direction: 'normal',
+      });
+    }
+  );
+
+  ArticleElement.addEventListener(
+    "mouseout",
+    function () {
+      anime({
+        targets: ArticleElement,
+        opacity: 0.1,
+        duration: 100,
+        direction: 'normal',
+      });
+    }
+  );
+
   ArticleElement.addEventListener(
     "click",
     function () {
