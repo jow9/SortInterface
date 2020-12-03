@@ -17,9 +17,14 @@ if (false)
 end
 
 if (cgi['cmd'] == 'read')
-  fh = open('../src/'+cgi['fn'], "r")
-  print fh.read
-  fh.close
+  fh1 = open('../src/'+cgi['fn1'], "r")
+  fh2 = open('../src/'+cgi['fn2'], "r")
+  fh3 = open('../src/'+cgi['fn3'], "r")
+  
+  print fh1.read + "&" + fh2.read + "&" + fh3.read
+  fh1.close
+  fh2.close
+  fh3.close
 
 elsif (cgi['cmd'] == 'transAll')
   readfh = open('../src/list/readArticleList.txt', "r")

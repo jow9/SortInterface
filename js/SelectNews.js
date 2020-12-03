@@ -68,32 +68,9 @@ window.onload = function () {
   LogWriteFile("画面のリロード");
 
   //記事データの読み込み→読みたい記事リストの読み込み→読みたくない記事リストの読み込みを終えた後にコラムの作成を行う
-  //ReadArticle() →  ReadListFile("read") → ReadListFile("noread") → CreateArticleList()の順に関数を呼び出す
+  //ReadArticle() →  ReadListFile() → CreateArticleList()の順に関数を呼び出す
   ReadArticle();
 };
-
-//window内でクリックされたら
-window.onclick = function () {
-  DeleteToMoveClum();
-}
-
-
-
-/*
-//「to-move-right(left)-clum」が表示されている場合消す
-*/
-function DeleteToMoveClum() {
-  let selectingElement = document.getElementsByClassName("work-block selecting");
-  let length = selectingElement.length;
-  if (length == 0) {
-    console.log("読む読まないの2択中の記事はありません");
-    return;
-  }
-  for (let i = 0; i < length; i = i + 1) {
-    if (selectingElement[0] == this.undefined) return;
-    selectingElement[0].classList.remove("selecting");
-  }
-}
 
 
 /*
@@ -156,7 +133,7 @@ function ReadArticle() {
       });
 
       console.log(GerneList);
-      ReadListFile("read");
+      ReadListFile();
     }
   }
 }
@@ -230,7 +207,7 @@ function CreateArticleList() {
           opacity: {
             value: 0,
             duration: 200,
-            endDelay: 200,
+            // endDelay: 200,
             easing: 'easeInExpo',
           },
           translateY: {
@@ -273,7 +250,7 @@ function CreateArticleList() {
             opacity: {
               value: 0,
               duration: 200,
-              endDelay: 200,
+              // endDelay: 200,
               easing: 'easeInExpo',
             },
             translateY: {
@@ -537,14 +514,14 @@ function WriteAllToNoReadFile() {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
       let list = xmlHttpReq.responseText.split(/\n/);
       for (let i = 0; i < list.length; i++) {
-        //already_read_article_list.push(list[i]);
-
         if (list[i] == "") {
           console.log("リストへの反映が終了");
           break;
         }
+
+        already_read_article_list.push(list[i]);
         let workBlockElement = document.getElementById(list[i]);
-        //CreateClum(workBlockElement, list[i], "alreadyread");
+        CreateClum(workBlockElement, list[i], "alreadyread");
 
         //要素を探索し削除
         //document.getElementById("next_read_article_" + list[i]).remove();
@@ -706,66 +683,58 @@ function CreateReadClum(id) {
 /*
 //ブラウザを更新したときの処理
 //指定したファイルからデータを読み込みmainclum（とreadページ）を編集する
-//読みたいリスト、（と読みたくないリスト）からデータを取得して画面状態を生成する
-//read, noread, alreadyread
+//読みたいリスト,読みたくないリスト,既読リストからデータを取得して画面状態を生成する
 */
-//後修正
-function ReadListFile(article_abs) {
-  console.log(article_abs + "にアクセス");
+function ReadListFile() {
+  console.log("各記事リストにアクセス");
   var xmlHttpReq = new XMLHttpRequest();
   var cmd = "./rb/index.rb?cmd=read";
-  var fileName = "&fn=list/" + article_abs + "ArticleList.txt";
+  var fileName = "&fn1=list/readArticleList.txt&fn2=list/noreadArticleList.txt&fn3=list/alreadyreadArticleList.txt";
 
   xmlHttpReq.open("GET", cmd + fileName, true); //ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス
   xmlHttpReq.send(null); //サーバーへのリクエストを送信する、引数はPOSTのときのみ利用
 
   xmlHttpReq.onreadystatechange = function () {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
-      let list = xmlHttpReq.responseText.split(/\n/);
+      let lists = xmlHttpReq.responseText.split("&");
+      read_article_list = lists[0].split(/\n/);
+      no_read_article_list = lists[1].split(/\n/);
+      already_read_article_list = lists[2].split(/\n/);
 
-      if (article_abs == "read") {
-        let con = false;
-        console.log(list.length);
-        if (list.length > 1) {
-          con = confirm("読みましたか？");
-        }
-
-        if (con == true) {
-          WriteAllToNoReadFile();
-        } else {
-          read_article_list = list;
-
-          //no_display_listから選択済みの記事を削除する
-          for (let i = 0; i < read_article_list.length; i++) {
-            no_display_list = no_display_list.filter(function (a) {
-              return a !== read_article_list[i];
-            });
-          }
-        }
-
-        ReadListFile("noread");
-      } else if (article_abs == "noread") {
-        no_read_article_list = list;
-
-        //no_display_listから選択済みの記事を削除する
-        for (let i = 0; i < no_read_article_list.length; i++) {
-          no_display_list = no_display_list.filter(function (a) {
-            return a !== no_read_article_list[i];
-          });
-        }
-
-        ReadListFile("alreadyread");
-      } else {
-        already_read_article_list = list;
-
-        //no_display_listから選択済みの記事を削除する
-        for (let i = 0; i < already_read_article_list.length; i++) {
-          no_display_list = no_display_list.filter(function (a) {
-            return a !== already_read_article_list[i];
-          });
-        }
-        CreateArticleList();
+      //readArticleList
+      let con = false;
+      if (read_article_list.length > 1) {
+        con = confirm("選択中の記事を既読リストへ移動してもよろしいですか？");
       }
+
+      if (con == true) {
+        WriteAllToNoReadFile();
+      } else {
+        //no_display_listから選択済みの記事を削除する
+        for (let i = 0; i < read_article_list.length; i++) {
+          no_display_list = no_display_list.filter(function (a) {
+            return a !== read_article_list[i];
+          });
+        }
+      }
+
+      //noreadArticleList
+      //no_display_listから選択済みの記事を削除する
+      for (let i = 0; i < no_read_article_list.length; i++) {
+        no_display_list = no_display_list.filter(function (a) {
+          return a !== no_read_article_list[i];
+        });
+      }
+
+      //alreadyreadArticleList
+      //no_display_listから選択済みの記事を削除する
+      for (let i = 0; i < already_read_article_list.length; i++) {
+        no_display_list = no_display_list.filter(function (a) {
+          return a !== already_read_article_list[i];
+        });
+      }
+
+      CreateArticleList();
     }
   };
 }
