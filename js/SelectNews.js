@@ -56,13 +56,14 @@ window.onload = function () {
     false
   );
 
-  document.getElementsByClassName("read_finish_button")[0].addEventListener(
-    "click",
-    function () {
-      WriteAllToNoReadFile();
-    },
-    false
-  );
+  //読了ボタン
+  // document.getElementsByClassName("read_finish_button")[0].addEventListener(
+  //   "click",
+  //   function () {
+  //     WriteAllToNoReadFile();
+  //   },
+  //   false
+  // );
 
   LogWriteFile("画面のリロード");
 
@@ -521,10 +522,10 @@ function ReWriteFile(article_abs, article_id) {
 */
 function WriteAllToNoReadFile() {
   LogWriteFile("選択記事の削除");
-  if (document.getElementsByClassName("next_read_article").length == 0) {
-    console.log("削除対象の記事が存在しません");
-    return;
-  }
+  // if (document.getElementsByClassName("next_read_article").length == 0) {
+  //   console.log("削除対象の記事が存在しません");
+  //   return;
+  // }
 
   read_article_list = [];
   let xmlHttpReq = new XMLHttpRequest();
@@ -536,17 +537,17 @@ function WriteAllToNoReadFile() {
     if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200) {
       let list = xmlHttpReq.responseText.split(/\n/);
       for (let i = 0; i < list.length; i++) {
-        already_read_article_list.push(list[i]);
+        //already_read_article_list.push(list[i]);
 
         if (list[i] == "") {
           console.log("リストへの反映が終了");
           break;
         }
         let workBlockElement = document.getElementById(list[i]);
-        CreateClum(workBlockElement, list[i], "alreadyread");
+        //CreateClum(workBlockElement, list[i], "alreadyread");
 
         //要素を探索し削除
-        document.getElementById("next_read_article_" + list[i]).remove();
+        //document.getElementById("next_read_article_" + list[i]).remove();
       }
     }
   };
@@ -635,10 +636,13 @@ function CreateReadClum(id) {
   ArticleElement.className = "next_read_article gerne_" + GerneList.indexOf(txt_array[0]);
   ArticleElement.id = "next_read_article_" + id;
 
+  //ジャンル順に並べる
+  //ArticleElement.style.order = GerneList.indexOf(txt_array[0]);
+
   anime({
     targets: ArticleElement,
-    opacity: [0, 0.1],
-    duration: 700,
+    opacity: [0, 0.2],
+    duration: 600,
     direction: 'normal',
   });
 
@@ -648,7 +652,7 @@ function CreateReadClum(id) {
       anime({
         targets: ArticleElement,
         opacity: 1,
-        duration: 100,
+        duration: 50,
         direction: 'normal',
       });
     }
@@ -659,8 +663,8 @@ function CreateReadClum(id) {
     function () {
       anime({
         targets: ArticleElement,
-        opacity: 0.1,
-        duration: 100,
+        opacity: 0.2,
+        duration: 50,
         direction: 'normal',
       });
     }
@@ -703,6 +707,7 @@ function CreateReadClum(id) {
 //ブラウザを更新したときの処理
 //指定したファイルからデータを読み込みmainclum（とreadページ）を編集する
 //読みたいリスト、（と読みたくないリスト）からデータを取得して画面状態を生成する
+//read, noread, alreadyread
 */
 //後修正
 function ReadListFile(article_abs) {
@@ -719,14 +724,25 @@ function ReadListFile(article_abs) {
       let list = xmlHttpReq.responseText.split(/\n/);
 
       if (article_abs == "read") {
-        read_article_list = list;
-
-        //no_display_listから選択済みの記事を削除する
-        for (let i = 0; i < read_article_list.length; i++) {
-          no_display_list = no_display_list.filter(function (a) {
-            return a !== read_article_list[i];
-          });
+        let con = false;
+        console.log(list.length);
+        if (list.length > 1) {
+          con = confirm("読みましたか？");
         }
+
+        if (con == true) {
+          WriteAllToNoReadFile();
+        } else {
+          read_article_list = list;
+
+          //no_display_listから選択済みの記事を削除する
+          for (let i = 0; i < read_article_list.length; i++) {
+            no_display_list = no_display_list.filter(function (a) {
+              return a !== read_article_list[i];
+            });
+          }
+        }
+
         ReadListFile("noread");
       } else if (article_abs == "noread") {
         no_read_article_list = list;
@@ -737,6 +753,7 @@ function ReadListFile(article_abs) {
             return a !== no_read_article_list[i];
           });
         }
+
         ReadListFile("alreadyread");
       } else {
         already_read_article_list = list;
