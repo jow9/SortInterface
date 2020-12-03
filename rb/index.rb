@@ -26,6 +26,12 @@ if (cgi['cmd'] == 'read')
   fh2.close
   fh3.close
 
+elsif (cgi['cmd'] == 'readList')
+  fh = open('../src/'+cgi['fn'], "r")
+  
+  print fh.read
+  fh.close
+  
 elsif (cgi['cmd'] == 'transAll')
   readfh = open('../src/list/readArticleList.txt', "r")
   alreadyreadfh = open('../src/list/alreadyreadArticleList.txt', "a")

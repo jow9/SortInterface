@@ -5,10 +5,10 @@ var GerneList = ["すべて"]
 
 window.onload = function () {
   /*ページ遷移処理を作成*/
-  let moveElement = document.getElementsByClassName('MoveViewPage');
-  moveElement[0].addEventListener("click", function () {
-    location.href = 'index.html';
-  }, false);
+  // let moveElement = document.getElementsByClassName('MoveViewPage');
+  // moveElement[0].addEventListener("click", function () {
+  //   location.href = 'index.html';
+  // }, false);
 
   ReadListFile("read");//ReadListFile() → CreateClumBase(list) → ClumIntotxt(list) と順番に呼び出しページを生成する
   LogWriteFile("画面の切り替え");
@@ -22,7 +22,7 @@ window.onload = function () {
 function ReadListFile(article_abs) {
   console.log(article_abs + "にアクセス");
   var xmlHttpReq = new XMLHttpRequest();
-  var cmd = "./rb/index.rb?cmd=read";
+  var cmd = "./rb/index.rb?cmd=readList";
   var fileName = "&fn=list/" + article_abs + "ArticleList.txt";
 
   xmlHttpReq.open('GET', cmd + fileName, true);//ここで指定するパスは、index.htmlファイルを基準にしたときの相対パス

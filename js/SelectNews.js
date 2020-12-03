@@ -18,6 +18,16 @@ var GerneList = []; //ジャンルリスト
 
 var article_num = 4;
 
+window.onpageshow = function (event) {
+  if (read_article_list.length > 1) {
+    let con = false;
+    con = confirm("選択中の記事を既読リストに登録しますか？");
+    if (con == true) {
+      WriteAllToNoReadFile();
+    }
+  }
+};
+
 window.onload = function () {
 
   console.log("Onload SelectNews.js file");
@@ -201,7 +211,9 @@ function CreateArticleList() {
     workBlockElement.addEventListener(
       "click",
       function (e) {
-        console.log("click");
+        if (nowActiveClum != "centerclum") {
+          return;
+        }
         anime({
           targets: workBlockElement,
           opacity: {
@@ -524,7 +536,9 @@ function WriteAllToNoReadFile() {
         CreateClum(workBlockElement, list[i], "alreadyread");
 
         //要素を探索し削除
-        //document.getElementById("next_read_article_" + list[i]).remove();
+        if (document.getElementsByClassName("next_read_article").length > 0) {
+          document.getElementById("next_read_article_" + list[i]).remove();
+        }
       }
     }
   };
@@ -704,7 +718,7 @@ function ReadListFile() {
       //readArticleList
       let con = false;
       if (read_article_list.length > 1) {
-        con = confirm("選択中の記事を既読リストへ移動してもよろしいですか？");
+        con = confirm("選択中の記事を既読リストに登録しますか？");
       }
 
       if (con == true) {
