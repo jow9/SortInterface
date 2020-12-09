@@ -8,15 +8,17 @@ var rightClumWrapperElement = document.getElementsByClassName("rightclum-wrapper
 var centerClumWrapperElement = document.getElementsByClassName("centerclum-wrapper");
 var nowActiveClum = "centerclum";
 
-var article_json;//全記事データ
-var read_article_list = [];//選択済み記事リスト
-var no_read_article_list = [];//ゴミ箱記事リスト
-var already_read_article_list = [];//既読記事リスト
-var display_list = [];//メインコラムに表示中のリスト
-var no_display_list = [];//非表示の記事リスト
+var article_json; //全記事データ
+var read_article_list = []; //選択済み記事リスト
+var no_read_article_list = []; //ゴミ箱記事リスト
+var already_read_article_list = []; //既読記事リスト
+var display_list = []; //メインコラムに表示中のリスト
+var no_display_list = []; //非表示の記事リスト
 var GerneList = []; //ジャンルリスト
 
 var article_num = 4;
+
+var gerne_flg = false;//ジャンルの表示をコントロール
 
 window.onpageshow = function (event) {
   if (read_article_list.length > 1) {
@@ -173,9 +175,13 @@ function AddToNoDisplyList(obj) {
   obj.id = no_display_list[ran];
   let h3Element = obj.getElementsByTagName("h3")[0];
   h3Element.innerHTML = txt_array[1];
-  let h4Element = obj.getElementsByTagName("h4")[0];
-  h4Element.className = "gerne_" + GerneList.indexOf(txt_array[0]);
-  h4Element.innerHTML = "#" + txt_array[0];
+
+  if (gerne_flg) {
+    let h4Element = obj.getElementsByTagName("h4")[0];
+    h4Element.className = "gerne_" + GerneList.indexOf(txt_array[0]);
+    h4Element.innerHTML = "#" + txt_array[0];
+  }
+
   let imgElement = obj.getElementsByTagName("img")[0];
   imgElement.src = txt_array[2];
   if (imgElement.src == "") {
@@ -211,7 +217,7 @@ function CreateArticleList() {
     workBlockElement.addEventListener(
       "click",
       function (e) {
-        if (nowActiveClum != "centerclum") {
+        if (nowActiveClum != "centerclum" || workBlockElement.getElementsByTagName("h3")[0].innerHTML == "No Article") {
           return;
         }
         anime({
@@ -255,41 +261,42 @@ function CreateArticleList() {
     toMoveLeftClumElement.addEventListener(
       "click",
       function (e) {
-        if (nowActiveClum == "centerclum") {
-          anime({
-            targets: workBlockElement,
-            // opacity: 0,
-            opacity: {
-              value: 0,
-              duration: 200,
-              // endDelay: 200,
-              easing: 'easeInExpo',
-            },
-            translateY: {
-              value: -100,
-            },
-            complete: function () {
-              if (nowActiveClum == "centerclum") {
-                DeleteArticle(workBlockElement);
-                AddToNoDisplyList(workBlockElement);
-                anime({
-                  targets: workBlockElement,
-                  // opacity: 1,
-                  opacity: {
-                    value: 1,
-                    duration: 200,
-                    easing: 'easeInExpo',
-                  },
-                  translateY: {
-                    value: 0,
-                    duration: 0,
-                  },
-                })
-              }
-            }
-          })
-          e.stopPropagation();
+        if (nowActiveClum != "centerclum" || workBlockElement.getElementsByTagName("h3")[0].innerHTML == "No Article") {
+          return;
         }
+        anime({
+          targets: workBlockElement,
+          // opacity: 0,
+          opacity: {
+            value: 0,
+            duration: 200,
+            // endDelay: 200,
+            easing: 'easeInExpo',
+          },
+          translateY: {
+            value: -100,
+          },
+          complete: function () {
+            if (nowActiveClum == "centerclum") {
+              DeleteArticle(workBlockElement);
+              AddToNoDisplyList(workBlockElement);
+              anime({
+                targets: workBlockElement,
+                // opacity: 1,
+                opacity: {
+                  value: 1,
+                  duration: 200,
+                  easing: 'easeInExpo',
+                },
+                translateY: {
+                  value: 0,
+                  duration: 0,
+                },
+              })
+            }
+          }
+        })
+        e.stopPropagation();
       },
       false
     );
@@ -605,14 +612,16 @@ function CreateClum(workBlockElement, id, select) {
   //h3要素（見出し）の作成
   let h3Element = document.createElement("h3");
   h3Element.innerHTML = txt_array[1];
+  ArticleElement.appendChild(h3Element);
 
   //h4要素（ジャンル）の作成
-  let h4Element = document.createElement("h4");
-  h4Element.innerHTML = txt_array[0];
-  ArticleElement.classList.add(h4Element.innerHTML.replace("#", ""));
+  if (gerne_flg) {
+    let h4Element = document.createElement("h4");
+    h4Element.innerHTML = "#" + txt_array[0];
+    ArticleElement.classList.add(h4Element.innerHTML.replace("#", ""));
+    ArticleElement.appendChild(h4Element);
+  }
 
-  ArticleElement.appendChild(h3Element);
-  ArticleElement.appendChild(h4Element);
   ArticlesElement[0].appendChild(ArticleElement);
 }
 
@@ -623,9 +632,14 @@ function CreateReadClum(id) {
   let ArticlesElement = document.getElementsByClassName("next_read_articles");
   let txt_array = article_json[id].split(/\r?\n/);
 
+
   let ArticleElement = document.createElement("div");
-  ArticleElement.className = "next_read_article gerne_" + GerneList.indexOf(txt_array[0]);
+  ArticleElement.className = "next_read_article";
   ArticleElement.id = "next_read_article_" + id;
+
+  if (gerne_flg) {
+    ArticleElement.classList.add("gerne_" + GerneList.indexOf(txt_array[0]));
+  }
 
   //ジャンル順に並べる
   //ArticleElement.style.order = GerneList.indexOf(txt_array[0]);
@@ -686,11 +700,14 @@ function CreateReadClum(id) {
 
   let pElement = document.createElement("p");
   pElement.innerHTML = txt_array[1];
-  let h4Element = document.createElement("h4");
-  h4Element.innerHTML = "#" + txt_array[0];
-
-  ArticleElement.appendChild(h4Element);
   ArticleElement.appendChild(pElement);
+
+  if (gerne_flg) {
+    let h4Element = document.createElement("h4");
+    h4Element.innerHTML = "#" + txt_array[0];
+    ArticleElement.appendChild(h4Element);
+  }
+
   ArticlesElement[0].appendChild(ArticleElement);
 }
 

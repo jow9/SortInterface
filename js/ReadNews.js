@@ -3,6 +3,8 @@ var worksElement = document.getElementsByClassName('works');
 var readWorksElement = document.getElementsByClassName('read-works');//右コラムの取得
 var GerneList = ["すべて"]
 
+var gerne_flg = false;//ジャンルの表示をコントロール
+
 window.onload = function () {
   /*ページ遷移処理を作成*/
   // let moveElement = document.getElementsByClassName('MoveViewPage');
@@ -105,7 +107,9 @@ function ClumIntotxt(list) {
         console.log(txt_array[1]);
 
         //ジャンルの登録
-        document.getElementsByClassName("work-block")[i].classList.add(txt_array[0]);
+        if (gerne_flg) {
+          document.getElementsByClassName("work-block")[i].classList.add(txt_array[0]);
+        }
         tempGerneList.push(txt_array[0]);//ジャンルリスト
 
         /*leftclum要素の作成*/
@@ -116,11 +120,15 @@ function ClumIntotxt(list) {
 
         /*mainClumの作成*/
         //work-txt要素の作成
-        let h2Element = document.createElement('h2');
-        let h4Element = document.createElement("h4");
+        let h1Element = document.createElement('h1');
         let pElement = document.createElement('p');
-        h2Element.innerHTML = txt_array[1];
-        h4Element.innerHTML = "#" + txt_array[0];
+        h1Element.innerHTML = txt_array[1];
+
+        if (gerne_flg) {
+          let h4Element = document.createElement("h4");
+          h4Element.innerHTML = "#" + txt_array[0];
+        }
+
         for (let j = 3; j < txt_array.length; j++) {
           pElement.innerHTML += txt_array[j];
         }
@@ -132,8 +140,11 @@ function ClumIntotxt(list) {
           this.style.display = "none";
         }
 
-        workElements[i].appendChild(h4Element);
-        workElements[i].appendChild(h2Element);
+        if (gerne_flg) {
+          workElements[i].appendChild(h4Element);
+        }
+
+        workElements[i].appendChild(h1Element);
         workElements[i].appendChild(imgElement);
         workElements[i].appendChild(pElement);
       }
