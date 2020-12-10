@@ -154,7 +154,7 @@ function ClumIntotxt(list) {
         return self.indexOf(x) === i;
       });
       console.log(GerneList);
-      CreatDropDownMenu(GerneList);
+      //CreatDropDownMenu(GerneList);
     }
   }
 
